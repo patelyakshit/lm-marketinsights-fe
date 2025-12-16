@@ -1,0 +1,615 @@
+import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Loader2, X, Check } from "lucide-react";
+
+import { usePromptContext } from "../../../hooks/usePromptContext";
+import { useWidgetInfo } from "../../../hooks/useWidgetInfo";
+import { useSpeechRecognitionCustom } from "../../../hooks/useSpeechRecognitionCustom";
+import useAudioVisualization from "../../../hooks/useAudioVisualization";
+
+import { ActionButton } from "../composite/ActionButton";
+import { DynamicChatInput } from "../composite/DynamicChatInput";
+import { Tooltip } from "../base/Tooltip";
+import { colors, typography } from "../../design-system";
+
+import {
+  PlusIcon,
+  MegaphoneIcon,
+  MapPinIcon,
+  FileTextIcon,
+} from "../../assets/icons";
+
+import VoiceModeIcon from "../../../components/svg/VoiceModeIcon";
+import MicIcon from "../../../components/svg/MicIcon";
+import ArrowUpIcon from "../../../components/svg/ArrowUpIcon";
+
+interface ChatLandingPanelProps {
+  onPromptSubmit?: (prompt: string) => void;
+  className?: string;
+  isCompact?: boolean;
+}
+
+const ChatLandingPanel: React.FC<ChatLandingPanelProps> = ({
+  onPromptSubmit,
+  className = "",
+  isCompact = false,
+}) => {
+  const [prompt, setPrompt] = useState("");
+  const [dictationMode, setDictationMode] = useState(false);
+  const [hoveredSuggestionIndex, setHoveredSuggestionIndex] = useState<
+    number | null
+  >(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [voiceModeBrowserSupported, setVoiceModeBrowserSupported] =
+    useState(false);
+  const router = useNavigate();
+  const { setInitialPrompt, setVoiceModeRedirect, setVoiceModeSupported } =
+    usePromptContext();
+  const { widgetInfo, isLoading: widgetInfoLoading } = useWidgetInfo();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const {
+    transcript,
+    error: speechError,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+    startListening: startSpeechRecognition,
+    stopListening: stopSpeechRecognition,
+  } = useSpeechRecognitionCustom();
+
+  const { audioLevels, isAnalyzing, startAnalysis, stopAnalysis } =
+    useAudioVisualization(46);
+
+  useEffect(() => {
+    if (!textareaRef.current || dictationMode) return;
+
+    const textarea = textareaRef.current;
+    const adjustHeight = () => {
+      textarea.style.height = "auto";
+      const computedStyle = window.getComputedStyle(textarea);
+      const lineHeight = parseInt(computedStyle.lineHeight) || 24;
+      const minHeight = lineHeight * 1;
+      const maxHeight = lineHeight * 5;
+      const scrollHeight = textarea.scrollHeight;
+      const newHeight = Math.max(minHeight, Math.min(maxHeight, scrollHeight));
+      textarea.style.height = `${newHeight}px`;
+      textarea.style.overflowY = scrollHeight > maxHeight ? "auto" : "hidden";
+    };
+
+    adjustHeight();
+    const handleInput = () => adjustHeight();
+    textarea.addEventListener("input", handleInput);
+    return () => textarea.removeEventListener("input", handleInput);
+  }, [prompt, dictationMode]);
+
+  useEffect(() => {
+    const checkVoiceModeSupport = () => {
+      const hasMediaDevices = !!(
+        navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+      );
+      const hasAudioContext = !!(
+        window.AudioContext ||
+        (window as typeof window & { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext
+      );
+      const hasMediaRecorder = typeof MediaRecorder !== "undefined";
+
+      const isSupported =
+        hasMediaDevices && hasAudioContext && hasMediaRecorder;
+
+      setVoiceModeBrowserSupported(isSupported);
+    };
+
+    checkVoiceModeSupport();
+  }, []);
+
+  const handleSubmitPrompt = () => {
+    if (prompt.trim() && !isSubmitting) {
+      setIsSubmitting(true);
+      setInitialPrompt(prompt);
+      if (onPromptSubmit) {
+        onPromptSubmit(prompt);
+      }
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleStartDictation = async () => {
+    resetTranscript();
+    setDictationMode(true);
+
+    try {
+      await startSpeechRecognition();
+      try {
+        await startAnalysis();
+      } catch (err) {
+        console.error("Failed to start audio visualization:", err);
+      }
+    } catch (err) {
+      console.error("Failed to start speech recognition:", err);
+      setDictationMode(false);
+    }
+  };
+
+  const handleStopDictation = () => {
+    if (transcript.trim()) setPrompt(transcript.trim());
+    stopSpeechRecognition();
+    setDictationMode(false);
+    stopAnalysis();
+    resetTranscript();
+  };
+
+  const handleConfirmDictation = () => {
+    const currentTranscript = transcript.trim();
+    handleStopDictation();
+    if (currentTranscript && !isSubmitting) {
+      setIsSubmitting(true);
+      setInitialPrompt(currentTranscript);
+      if (onPromptSubmit) {
+        onPromptSubmit(currentTranscript);
+      }
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVoiceModeRedirect = () => {
+    if (!isSubmitting && voiceModeBrowserSupported) {
+      setIsSubmitting(true);
+      setVoiceModeRedirect(true);
+      setVoiceModeSupported(true);
+      setInitialPrompt(prompt.trim() || "");
+      router("/map");
+    }
+  };
+
+  const suggestions = widgetInfo?.details?.data?.meta?.suggested_message || [
+    "Is Uptown Dallas a good area for opening a car wash?",
+    "Scan competition within 3 miles of Scottsdale Fashion Square.",
+    "Compare Plano, TX and Frisco, TX for a new gym location.",
+  ];
+
+  const actionButtons = [
+    {
+      icon: MegaphoneIcon,
+      label: "Create Marketing Post",
+      onClick: () => {},
+      disabled: false,
+    },
+    {
+      icon: MapPinIcon,
+      label: "Create Placestory",
+      onClick: () => {},
+      disabled: false,
+    },
+    {
+      icon: FileTextIcon,
+      label: "Create Report",
+      onClick: () => {},
+      disabled: true,
+      badge: "Soon",
+    },
+  ];
+
+  const handleSuggestionClick = (suggestion: string) => {
+    if (!isSubmitting) {
+      setInitialPrompt(suggestion);
+      if (onPromptSubmit) {
+        onPromptSubmit(suggestion);
+      }
+    }
+  };
+
+  return (
+    <div
+      className={`h-full w-full relative ${className}`}
+      style={{ backgroundColor: colors.bg.weaker[25] }}
+    >
+      <style>
+        {`
+          .dashboard-textarea::placeholder {
+            font-family: Switzer, sans-serif;
+            font-weight: 400;
+            font-style: normal;
+            font-size: 16px;
+            line-height: 24px;
+            letter-spacing: -0.08px;
+            color: ${colors.text.soft[400]};
+          }
+
+          /* Custom horizontal scrollbar for compact mode */
+          .compact-scroll::-webkit-scrollbar {
+            height: 6px;
+          }
+
+          .compact-scroll::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .compact-scroll::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 3px;
+          }
+
+          .compact-scroll::-webkit-scrollbar-thumb:hover {
+            background-color: #9ca3af;
+          }
+
+          /* Firefox scrollbar */
+          .compact-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: #d1d5db transparent;
+          }
+
+          /* Hide scrollbar when not hovering (optional smooth UX) */
+          .compact-scroll::-webkit-scrollbar-thumb {
+            background-color: transparent;
+            transition: background-color 0.2s;
+          }
+
+          .compact-scroll:hover::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+          }
+        `}
+      </style>
+
+      <div
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center"
+        style={{
+          width: isCompact ? "90%" : "740px",
+          maxWidth: "100%",
+          padding: "0 20px",
+        }}
+      >
+        <div
+          className="flex flex-col items-center justify-center w-full"
+          style={{ gap: "32px" }}
+        >
+          {/* Main Heading */}
+          <h1
+            className="text-center w-full"
+            style={{
+              fontFamily: "Switzer, sans-serif",
+              fontSize: isCompact ? "24px" : "32px",
+              fontWeight: 400,
+              fontStyle: "normal",
+              lineHeight: isCompact ? "32px" : "40px",
+              letterSpacing: "0",
+              color: "#292a2e",
+            }}
+          >
+            What business decision can I help you with?
+          </h1>
+
+          {/* Chat Input Container */}
+          <div
+            className="flex flex-col gap-5 items-center justify-center w-full"
+            style={{ gap: "20px" }}
+          >
+            {!dictationMode ? (
+              <DynamicChatInput
+                ref={textareaRef}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onSend={handleSubmitPrompt}
+                placeholder="Ask anything about a location, building, market, or customer segment…"
+                disabled={isSubmitting}
+                autoResize={true}
+                minRows={1}
+                maxRows={5}
+                size="lg"
+                borderRadius="xl"
+                containerClassName="w-full"
+                borderColor="#dddee1"
+                textareaPadding="20px"
+                buttonRowPadding="12px"
+                leftActions={
+                  <Tooltip content="Add files and more" side="top">
+                    <div className="cursor-pointer">
+                      <PlusIcon
+                        size={36}
+                        borderColor={colors.neutral[200]}
+                        iconColor={colors.neutral[800]}
+                      />
+                    </div>
+                  </Tooltip>
+                }
+                rightActions={
+                  <>
+                    <Tooltip
+                      content={
+                        !browserSupportsSpeechRecognition
+                          ? "Speech recognition not supported in this browser"
+                          : "Dictate"
+                      }
+                      side="top"
+                    >
+                      <motion.button
+                        onClick={handleStartDictation}
+                        disabled={
+                          !browserSupportsSpeechRecognition || isSubmitting
+                        }
+                        className="rounded-full flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{
+                          color: colors.icon.strong[950],
+                        }}
+                        whileHover={
+                          !isSubmitting && browserSupportsSpeechRecognition
+                            ? { scale: 1.15, color: "#030712" }
+                            : {}
+                        }
+                        whileTap={
+                          !isSubmitting && browserSupportsSpeechRecognition
+                            ? { scale: 0.95 }
+                            : {}
+                        }
+                        transition={{ type: "tween", duration: 0.15 }}
+                      >
+                        <MicIcon size={36} />
+                      </motion.button>
+                    </Tooltip>
+
+                    {/* Show voice mode icon only when input is empty */}
+                    {!prompt.trim() && (
+                      <Tooltip
+                        content={
+                          voiceModeBrowserSupported
+                            ? "Voice mode"
+                            : "Voice mode not supported in this browser"
+                        }
+                        side="top"
+                      >
+                        <button
+                          onClick={handleVoiceModeRedirect}
+                          disabled={!voiceModeBrowserSupported || isSubmitting}
+                          className={`rounded-full flex items-center justify-center ${
+                            voiceModeBrowserSupported
+                              ? "cursor-pointer text-gray-950 hover:bg-[#545251]"
+                              : "cursor-not-allowed text-gray-400"
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          <VoiceModeIcon size={36} />
+                        </button>
+                      </Tooltip>
+                    )}
+
+                    {/* Show send button only when there is text */}
+                    {prompt.trim() && !isSubmitting && (
+                      <Tooltip content="Send message" side="top">
+                        <button
+                          onClick={handleSubmitPrompt}
+                          className="rounded-full flex items-center justify-center cursor-pointer bg-gray-900 text-white hover:bg-[#545251]"
+                        >
+                          <ArrowUpIcon isEnabled={true} size={36} />
+                        </button>
+                      </Tooltip>
+                    )}
+                  </>
+                }
+              />
+            ) : (
+              /* Dictation Mode UI */
+              <div
+                className="bg-white border rounded-[24px] w-full overflow-hidden"
+                style={{ borderColor: "#dddee1" }}
+              >
+                <div
+                  className="flex gap-2 items-start w-full"
+                  style={{
+                    minHeight: "60px",
+                    padding: "20px",
+                  }}
+                >
+                  <div className="w-full h-[48px] p-2 gap-1 opacity-100 rounded bg-white shadow-[0px_48px_48px_-24px_rgba(51,51,51,0.04)] overflow-hidden border-none flex justify-start items-center">
+                    <div className="flex-1 p-1 flex justify-between items-center">
+                      {audioLevels.map((height, i) => (
+                        <div
+                          key={i}
+                          className={`w-[1px] opacity-60 transition-all duration-75 ${
+                            isAnalyzing && height > 2
+                              ? "bg-[#171717]"
+                              : "bg-[#D1D1D1]"
+                          }`}
+                          style={{
+                            height: `${height}px`,
+                            transform: isAnalyzing
+                              ? "scaleY(1)"
+                              : "scaleY(0.3)",
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <motion.button
+                      onClick={handleStopDictation}
+                      className="p-2 rounded-full flex items-center justify-center cursor-pointer hover:text-gray-950 hover:bg-gray-200 bg-gray-100 text-gray-600 animate-pulse"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 17,
+                      }}
+                      title="Stop dictation"
+                    >
+                      <X size={16} className="text-gray-600" />
+                    </motion.button>
+                    <motion.button
+                      onClick={handleConfirmDictation}
+                      className="p-2 rounded-full flex items-center justify-center cursor-pointer hover:text-gray-950 hover:bg-gray-50"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 17,
+                      }}
+                      title="Use dictation"
+                    >
+                      <Check size={16} className="text-gray-600" />
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div
+              className={`flex items-center ${
+                isCompact
+                  ? "justify-start overflow-x-auto compact-scroll"
+                  : "justify-center flex-wrap"
+              }`}
+              style={{
+                gap: "8px",
+                width: "100%",
+                paddingBottom: isCompact ? "4px" : "0",
+              }}
+            >
+              {actionButtons.map((button, index) => (
+                <div key={index} className={isCompact ? "flex-shrink-0" : ""}>
+                  <ActionButton
+                    icon={button.icon}
+                    label={button.label}
+                    onClick={button.onClick}
+                    disabled={button.disabled || isSubmitting}
+                    badge={button.badge}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Suggestions Section - Absolutely positioned at bottom */}
+      <div
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 flex flex-col items-center"
+        style={{
+          maxWidth: isCompact ? "90%" : "740px",
+          width: "100%",
+          padding: isCompact ? "0 12px 24px" : "0 20px 40px",
+        }}
+      >
+        <div className="flex flex-col w-full" style={{ gap: "12px" }}>
+          <p
+            className="text-center w-full"
+            style={{
+              fontFamily: typography.fontFamily.primary,
+              fontSize: "14px",
+              fontWeight: typography.fontWeight.regular,
+              lineHeight: "20px",
+              letterSpacing: "-0.084px",
+              color: colors.neutral[500],
+            }}
+          >
+            Here are a few ways to get started.
+          </p>
+
+          <div
+            className={`flex items-start w-full ${
+              isCompact ? "overflow-x-auto compact-scroll" : ""
+            }`}
+            style={{
+              gap: "12px",
+              paddingBottom: isCompact ? "4px" : "0",
+            }}
+          >
+            {widgetInfoLoading ? (
+              <div
+                className="flex items-center gap-2 w-full justify-center"
+                style={{ color: colors.text.sub[600] }}
+              >
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                <span className="text-sm">Loading suggestions...</span>
+              </div>
+            ) : (
+              suggestions.map((suggestion, index) => {
+                const isHovered = hoveredSuggestionIndex === index;
+                return (
+                  <motion.div
+                    key={index}
+                    className={`${
+                      isCompact ? "flex-shrink-0" : ""
+                    } cursor-pointer flex items-center`}
+                    style={{
+                      backgroundColor: isHovered
+                        ? colors.neutral[600]
+                        : colors.neutral[200],
+                      borderRadius: "6px",
+                      padding: "20px",
+                      minHeight: "80px",
+                      width: isCompact ? "229px" : "229px",
+                      flex: isCompact ? "0 0 auto" : "1 1 0",
+                    }}
+                    onMouseEnter={() => setHoveredSuggestionIndex(index)}
+                    onMouseLeave={() => setHoveredSuggestionIndex(null)}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "tween", duration: 0.15 }}
+                  >
+                    <p
+                      style={{
+                        fontFamily: typography.fontFamily.primary,
+                        fontSize: "14px",
+                        fontWeight: typography.fontWeight.regular,
+                        lineHeight: "20px",
+                        letterSpacing: "-0.084px",
+                        color: isHovered
+                          ? colors.static.white
+                          : colors.neutral[900],
+                      }}
+                    >
+                      {suggestion}
+                    </p>
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Loading indicator */}
+      {isSubmitting && (
+        <motion.div
+          className="absolute top-2 right-2 z-20"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+        >
+          <div
+            className="flex items-center gap-2 px-3 py-2 bg-white rounded-full"
+            style={{ boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}
+          >
+            <Loader2
+              className="w-4 h-4 animate-spin"
+              style={{ color: colors.brand.orange[500] }}
+            />
+            <span className="text-sm" style={{ color: colors.text.sub[600] }}>
+              Processing...
+            </span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Speech recognition error display */}
+      {speechError && (
+        <motion.div
+          className="absolute top-20 left-1/2 -translate-x-1/2 z-20"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+        >
+          <div
+            className="px-4 py-2 bg-red-50 border border-red-200 rounded-lg"
+            style={{ color: "#dc2626" }}
+          >
+            {speechError}
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+};
+
+export default ChatLandingPanel;

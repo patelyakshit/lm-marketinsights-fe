@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcGIS Core SDK - Technical Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2F45FF 0%, #1E3A8A 100%);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 20px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2F45FF;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #2F45FF;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #2F45FF;
+            padding-bottom: 10px;
+        }
+
+        .section h3 {
+            color: #1E3A8A;
+            font-size: 1.4rem;
+            margin: 25px 0 15px 0;
+        }
+
+        .section h4 {
+            color: #374151;
+            font-size: 1.2rem;
+            margin: 20px 0 10px 0;
+        }
+
+        .code-block {
+            background: #1f2937;
+            color: #e5e7eb;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            margin: 15px 0;
+            border-left: 4px solid #2F45FF;
+        }
+
+        .highlight {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-box {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .architecture-diagram {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .flow-diagram {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid #2F45FF;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: #2F45FF;
+            z-index: 1;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tech-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .tech-item h4 {
+            color: #2F45FF;
+            margin-bottom: 5px;
+        }
+
+        .tech-item p {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th {
+            background: #2F45FF;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .table td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table tr:hover {
+            background: #f8fafc;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .toc {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .toc h2 {
+            color: #2F45FF;
+            margin-bottom: 20px;
+        }
+
+        .toc ul {
+            list-style: none;
+        }
+
+        .toc li {
+            margin: 10px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .toc li::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: #2F45FF;
+            font-size: 0.8rem;
+        }
+
+        .toc a {
+            color: #374151;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: #2F45FF;
+        }
+
+        .footer {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        .data-flow-chart {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .flow-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .flow-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .flow-node {
+            background: linear-gradient(135deg, #2F45FF 0%, #1E3A8A 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 150px;
+            position: relative;
+        }
+
+        .flow-node::after {
+            content: '↓';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: #2F45FF;
+        }
+
+        .flow-row:last-child .flow-node::after {
+            display: none;
+        }
+
+        .flow-node h4 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .flow-node p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .layer-flow-diagram {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .layer-flow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .layer-flow-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .layer-flow-item::after {
+            content: '→';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            color: #2F45FF;
+            z-index: 1;
+        }
+
+        .layer-flow-item:last-child::after {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .flow-diagram {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-step::after {
+                display: none;
+            }
+
+            .flow-row {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .layer-flow-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .layer-flow-item::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">GIS</div>
+        <h1>ArcGIS Core SDK - Technical Documentation</h1>
+        <p>Comprehensive Technical Guide & Data Flow Architecture</p>
+        <div class="version-badge">v4.33.6</div>
+    </div>
+
+    <div class="container">
+        <div class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#architecture">System Architecture</a></li>
+                <li><a href="#data-flow">Data Flow & Rendering</a></li>
+                <li><a href="#layer-management">Layer Management Flow</a></li>
+                <li><a href="#arcgis-data-flow">ArcGIS SDK Data Flow</a></li>
+                <li><a href="#tech-stack">Technology Stack</a></li>
+                <li><a href="#implementation">Implementation Details</a></li>
+                <li><a href="#setup">Setup & Configuration</a></li>
+                <li><a href="#api-reference">API Reference</a></li>
+                <li><a href="#deployment">Deployment Guide</a></li>
+            </ul>
+        </div>
+
+     
+
+        <div class="section" id="architecture">
+            <h2>System Architecture</h2>
+            
+            <div class="architecture-diagram">
+                <h3>High-Level System Architecture</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
+                    <div style="background: #dbeafe; padding: 20px; border-radius: 8px;">
+                        <h4>Presentation Layer</h4>
+                        <p>React + TypeScript</p>
+                        <p>ArcGIS Core SDK</p>
+                        <p>Tailwind CSS</p>
+                    </div>
+                    <div style="background: #fef3c7; padding: 20px; border-radius: 8px;">
+                        <h4>Business Logic</h4>
+                        <p>Zustand Stores</p>
+                        <p>Context Providers</p>
+                        <p>Event Emitter</p>
+                    </div>
+                    <div style="background: #dcfce7; padding: 20px; border-radius: 8px;">
+                        <h4>Data Services</h4>
+                        <p>ArcGIS Online</p>
+                        <p>External APIs</p>
+                        <p>WebSocket Services</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Core Components</h3>
+            <div class="table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Component</th>
+                            <th>Purpose</th>
+                            <th>Technology</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>MapView</td>
+                            <td>Main map rendering and interaction</td>
+                            <td>ArcGIS Core SDK</td>
+                        </tr>
+                        <tr>
+                            <td>Layer Management</td>
+                            <td>Dynamic layer addition/removal</td>
+                            <td>Custom Hooks + ArcGIS</td>
+                        </tr>
+                        <tr>
+                            <td>State Management</td>
+                            <td>Application state and data flow</td>
+                            <td>Zustand + Context API</td>
+                        </tr>
+                        <tr>
+                            <td>UI Components</td>
+                            <td>Interactive tools and controls</td>
+                            <td>React + Radix UI</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section" id="data-flow">
+            <h2>🔄 Complete Data Flow & Rendering</h2>
+            
+            <h3>Main Data Flow Pipeline</h3>
+            <div class="flow-diagram">
+                <div class="flow-step">
+                    <h4>1. User Input</h4>
+                    <p>Layer selection, configuration, and user interactions</p>
+                </div>
+                <div class="flow-step">
+                    <h4>2. Data Validation</h4>
+                    <p>Input validation and data structure verification</p>
+                </div>
+                <div class="flow-step">
+                    <h4>3. ArcGIS Processing</h4>
+                    <p>Layer conversion and ArcGIS SDK integration</p>
+                </div>
+                <div class="flow-step">
+                    <h4>4. WebGL Rendering</h4>
+                    <p>GPU-accelerated map rendering and display</p>
+                </div>
+                <div class="flow-step">
+                    <h4>5. Interactive Display</h4>
+                    <p>User interaction handling and real-time updates</p>
+                </div>
+            </div>
+
+            <h3>Layer Management Flow</h3>
+            <div class="layer-flow-diagram">
+                <h4>How Users Apply and Remove Layers</h4>
+                <div class="layer-flow-grid">
+                    <div class="layer-flow-item">
+                        <h4>1. Layer Selection</h4>
+                        <p>User selects layer from catalog or uploads file</p>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>ArcGIS Online layers</li>
+                            <li>File uploads (CSV, GeoJSON)</li>
+                            <li>Web services</li>
+                        </ul>
+                    </div>
+                    <div class="layer-flow-item">
+                        <h4>2. Layer Processing</h4>
+                        <p>Layer data is processed and validated</p>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>Geometry validation</li>
+                            <li>Attribute processing</li>
+                            <li>Coordinate system conversion</li>
+                        </ul>
+                    </div>
+                    <div class="layer-flow-item">
+                        <h4>3. ArcGIS Integration</h4>
+                        <p>Layer is converted to ArcGIS format</p>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>FeatureLayer creation</li>
+                            <li>Renderer configuration</li>
+                            <li>Popup template setup</li>
+                        </ul>
+                    </div>
+                    <div class="layer-flow-item">
+                        <h4>4. Map Rendering</h4>
+                        <p>Layer is added to map and rendered</p>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>WebGL rendering</li>
+                            <li>Layer ordering</li>
+                            <li>Performance optimization</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Data Flow Architecture</h3>
+            <div class="code-block">
+// Data Flow Example - Layer Management
+const useMapLayers = ({ view, appliedLayers }) => {
+  // 1. Process layer changes
+  const processLayerChanges = async () => {
+    const { added, removed, updated } = findLayerDifferences(oldLayers, newLayers);
+    
+    // 2. Remove old layers
+    removed.forEach(layer => view.map.remove(layer));
+    
+    // 3. Add new layers
+    for (const layerItem of added) {
+      const layer = await createLayerByType(layerItem);
+      view.map.add(layer);
+    }
+    
+    // 4. Update existing layers
+    updated.forEach(layer => updateLayerProperties(layer));
+  };
+  
+  // 5. Reorder layers for proper rendering
+  reorderLayers(view.map);
+};
+            </div>
+
+            <h3>Layer Types Supported</h3>
+            <div class="info-box">
+                <strong>Supported Layer Types:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Feature Layer:</strong> Vector data with attributes and popups</li>
+                    <li><strong>Map Image Layer:</strong> Raster-based map services</li>
+                    <li><strong>Vector Tile Layer:</strong> Optimized vector tiles</li>
+                    <li><strong>Imagery Layer:</strong> Satellite and aerial imagery</li>
+                    <li><strong>Group Layer:</strong> Organized layer collections</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="layer-management">
+            <h2>Layer Management Flow</h2>
+            
+            <div class="layer-flow-diagram">
+                <h3>Layer Application & Management Flow</h3>
+                <div class="layer-flow-grid">
+                    <div class="layer-flow-item">
+                        <h4>1. Layer Selection</h4>
+                        <p>User selects layer from catalog or uploads file</p>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>ArcGIS Online layers</li>
+                            <li>File uploads (CSV, GeoJSON)</li>
+                            <li>Web services</li>
+                        </ul>
+                    </div>
+                    <div class="layer-flow-item">
+                        <h4>2. Layer Processing</h4>
+                        <p>Layer data is processed and validated</p>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>Geometry validation</li>
+                            <li>Attribute processing</li>
+                            <li>Coordinate system conversion</li>
+                        </ul>
+                    </div>
+                    <div class="layer-flow-item">
+                        <h4>3. ArcGIS Integration</h4>
+                        <p>Layer is converted to ArcGIS format</p>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>FeatureLayer creation</li>
+                            <li>Renderer configuration</li>
+                            <li>Popup template setup</li>
+                        </ul>
+                    </div>
+                    <div class="layer-flow-item">
+                        <h4>4. Map Rendering</h4>
+                        <p>Layer is added to map and rendered</p>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>WebGL rendering</li>
+                            <li>Layer ordering</li>
+                            <li>Performance optimization</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Layer Management Hook Flow</h3>
+            <div class="code-block">
+// Layer Management Hook - Data Flow
+export function useMapLayers({ view, appliedLayers }) {
+  const [isMapLoading, setIsMapLoading] = useState(false);
+  
+  // Process layer changes efficiently
+  const processLayerChanges = async () => {
+    const { added, removed, updated } = findLayerDifferences(oldLayers, newLayers);
+    
+    // Batch operations for performance
+    await Promise.all([
+      ...removed.map(layer => removeLayer(layer)),
+      ...added.map(layer => addLayer(layer)),
+      ...updated.map(layer => updateLayer(layer))
+    ]);
+  };
+  
+  return { isMapLoading };
+}
+            </div>
+        </div>
+
+        <div class="section" id="arcgis-data-flow">
+            <h2>ArcGIS SDK Data Flow</h2>
+            
+            <div class="data-flow-chart">
+                <h3>ArcGIS Core SDK Data Processing Flow</h3>
+                <div class="flow-chart">
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            <h4>User Input</h4>
+                            <p>Layer selection & configuration</p>
+                        </div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            <h4>Data Validation</h4>
+                            <p>Geometry & attribute validation</p>
+                        </div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            <h4>ArcGIS Processing</h4>
+                            <p>Layer conversion & optimization</p>
+                        </div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            <h4>WebGL Rendering</h4>
+                            <p>GPU-accelerated rendering</p>
+                        </div>
+                    </div>
+                    <div class="flow-row">
+                        <div class="flow-node">
+                            <h4>Interactive Display</h4>
+                            <p>User interaction & updates</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>ArcGIS Data Processing Pipeline</h3>
+            <div class="code-block">
+// ArcGIS Core SDK Data Flow
+const createLayerByType = async (layerItem: AppliedLayer) => {
+  const layerType = layerItem.layerType || layerItem.type || "";
+  
+  switch (layerType) {
+    case "Feature Layer":
+      // 1. Create FeatureLayer instance
+      const featureLayer = new FeatureLayer({
+        url: layerItem.url,
+        title: layerItem.title,
+        visible: layerItem.visibility ?? true,
+        outFields: ["*"],
+        popupEnabled: layerItem.popupEnabled ?? true
+      });
+      
+      // 2. Load layer data
+      await featureLayer.load();
+      
+      // 3. Configure popup template
+      if (layerItem.popupTemplate) {
+        featureLayer.popupTemplate = layerItem.popupTemplate;
+      }
+      
+      // 4. Set renderer if specified
+      if (layerItem.renderer) {
+        featureLayer.renderer = layerItem.renderer;
+      }
+      
+      return featureLayer;
+      
+    case "Map Image Layer":
+      // Handle Map Image Layer creation
+      return new MapImageLayer({
+        url: layerItem.url,
+        title: layerItem.title,
+        visible: layerItem.visibility ?? true
+      });
+      
+    default:
+      throw new Error(`Unsupported layer type: ${layerType}`);
+  }
+};
+            </div>
+
+            <h3>Core ArcGIS Functionality</h3>
+            <div class="info-box">
+                <h4>🎯 Main ArcGIS Features</h4>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Interactive Mapping:</strong> Pan, zoom, and navigate with smooth WebGL rendering</li>
+                    <li><strong>Layer Management:</strong> Add, remove, reorder, and configure multiple layer types</li>
+                    <li><strong>Data Visualization:</strong> Custom renderers, popups, and labeling</li>
+                    <li><strong>Spatial Analysis:</strong> Query features, measure distances, and analyze spatial relationships</li>
+                    <li><strong>Coordinate Systems:</strong> Support for multiple projections and transformations</li>
+                    <li><strong>Performance Optimization:</strong> Level-of-detail rendering and viewport culling</li>
+                </ul>
+            </div>
+
+            <h3>User Layer Operations</h3>
+            <div class="data-flow-grid">
+                <div class="data-flow-item">
+                    <h4>➕ Adding Layers</h4>
+                    <ul>
+                        <li>Browse ArcGIS Online catalog</li>
+                        <li>Upload CSV/GeoJSON files</li>
+                        <li>Add web services (WMS, WFS)</li>
+                        <li>Import from ArcGIS Pro projects</li>
+                        <li>Create custom graphics layers</li>
+                    </ul>
+                </div>
+                <div class="data-flow-item">
+                    <h4>⚙️ Configuring Layers</h4>
+                    <ul>
+                        <li>Set visibility and opacity</li>
+                        <li>Configure popup templates</li>
+                        <li>Apply custom renderers</li>
+                        <li>Set scale dependencies</li>
+                        <li>Configure labeling</li>
+                    </ul>
+                </div>
+                <div class="data-flow-item">
+                    <h4>🗑️ Removing Layers</h4>
+                    <ul>
+                        <li>Remove individual layers</li>
+                        <li>Clear all layers</li>
+                        <li>Reset to default state</li>
+                        <li>Save layer configurations</li>
+                        <li>Export layer settings</li>
+                    </ul>
+                </div>
+                <div class="data-flow-item">
+                    <h4>🔄 Managing Layers</h4>
+                    <ul>
+                        <li>Reorder layer stacking</li>
+                        <li>Group related layers</li>
+                        <li>Apply filters and queries</li>
+                        <li>Set layer permissions</li>
+                        <li>Monitor layer performance</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Data Transformation Process</h3>
+            <div class="info-box">
+                <strong>Data Transformation Steps:</strong>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Input Validation:</strong> Check data format and structure</li>
+                    <li><strong>Coordinate Conversion:</strong> Transform to Web Mercator (EPSG:3857)</li>
+                    <li><strong>Attribute Mapping:</strong> Map fields to ArcGIS schema</li>
+                    <li><strong>Geometry Processing:</strong> Validate and optimize geometries</li>
+                    <li><strong>Renderer Setup:</strong> Configure visual representation</li>
+                    <li><strong>Performance Optimization:</strong> Implement level-of-detail and culling</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="tech-stack">
+            <h2>Technology Stack</h2>
+            
+            <div class="tech-stack">
+                <div class="tech-item">
+                    <h4>Frontend Framework</h4>
+                    <p>React 18 + TypeScript</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Mapping SDK</h4>
+                    <p>ArcGIS Core v4.33.6</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Styling</h4>
+                    <p>Tailwind CSS</p>
+                </div>
+                <div class="tech-item">
+                    <h4>State Management</h4>
+                    <p>Zustand + Context API</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Build Tool</h4>
+                    <p>Vite</p>
+                </div>
+                <div class="tech-item">
+                    <h4>Package Manager</h4>
+                    <p>npm</p>
+                </div>
+            </div>
+
+            <h3>Dependencies</h3>
+            <div class="code-block">
+{
+  "dependencies": {
+    "@arcgis/core": "^4.33.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.4.0",
+    "@tanstack/react-query": "^5.0.0",
+    "@radix-ui/react-popover": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "tailwindcss": "^3.3.0",
+    "@types/react": "^18.2.0"
+  }
+}
+            </div>
+        </div>
+
+        <div class="section" id="implementation">
+            <h2>🚀 Application Structure & Entry Points</h2>
+            
+            <h3>📁 Project File Structure</h3>
+            <div class="info-box">
+                <h4>Core Application Files</h4>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>src/main.tsx</strong> - Application entry point with providers</li>
+                    <li><strong>src/App.tsx</strong> - Main application component and routing</li>
+                    <li><strong>src/modules/map/MapView.tsx</strong> - Core map component</li>
+                    <li><strong>src/hooks/useMapLayers.ts</strong> - Layer management hook</li>
+                    <li><strong>src/store/</strong> - State management with Zustand</li>
+                    <li><strong>src/components/</strong> - Reusable UI components</li>
+                </ul>
+            </div>
+
+            <h3>🎯 Application Entry Points</h3>
+            <div class="code-block">
+// 1. MAIN ENTRY POINT - src/main.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import App from './App';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { staleTime: 5 * 60 * 1000, retry: 1 }
+  }
+});
+
+const Root = () => (
+  <React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </QueryClientProvider>
+  </React.StrictMode>
+);
+
+ReactDOM.createRoot(document.getElementById('root')!).render(<Root />);
+            </div>
+
+            <h3>🗺️ Map Component Structure</h3>
+            <div class="code-block">
+// 2. MAP COMPONENT - src/modules/map/MapView.tsx
+const MapComponent = ({ isMapExpanded, isProfileLoading, setIsMapExpanded }) => {
+  const [view, setView] = useState<MapView | null>(null);
+  const [appliedLayers, setAppliedLayers] = useState<AppliedLayer[]>([]);
+  
+  // ArcGIS Core SDK initialization
+  useEffect(() => {
+    const defaultMap = new WebMap({
+      portalItem: { id: DEFAULT_WEBMAP_ID }
+    });
+    
+    const newView = new MapView({
+      container: mapDiv.current,
+      map: defaultMap,
+      constraints: {
+        minZoom: mapConstants.MIN_ZOOM,
+        maxZoom: mapConstants.MAX_ZOOM
+      }
+    });
+    
+    setView(newView);
+  }, []);
+  
+  return (
+    <div className="relative w-full h-full">
+      <div ref={mapDiv} className="w-full h-full" />
+      <MapTopTools view={view} />
+      <MapBottomTools view={view} />
+    </div>
+  );
+};
+
+            <h3>🔧 Layer Management Hook</h3>
+            <div class="code-block">
+// 3. LAYER MANAGEMENT - src/hooks/useMapLayers.ts
+export function useMapLayers({ view, appliedLayers }) {
+  const [isMapLoading, setIsMapLoading] = useState(false);
+  
+  // Process layer changes efficiently
+  const processLayerChanges = async () => {
+    const { added, removed, updated } = findLayerDifferences(oldLayers, newLayers);
+    
+    // Batch operations for performance
+    await Promise.all([
+      ...removed.map(layer => removeLayer(layer)),
+      ...added.map(layer => addLayer(layer)),
+      ...updated.map(layer => updateLayer(layer))
+    ]);
+  };
+  
+  return { isMapLoading };
+}
+            </div>
+
+            <h3>📊 State Management Structure</h3>
+            <div class="code-block">
+// 4. STATE MANAGEMENT - src/store/mapStore.ts
+export const useMapStore = create<MapStore>((set, get) => ({
+  center: { lat: 0, lng: 0 },
+  zoom: 10,
+  baseMapId: null,
+  appliedLayersData: "",
+  parcelPins: [],
+  
+  updateMapState: (zoom, center, boundingBox, mapScale) => set({
+    zoom, center, boundingBox, mapScale
+  }),
+  
+  addParcelPin: (parcelId, lat, lon, attributes) => set(state => ({
+    parcelPins: [...state.parcelPins, { parcelId, lat, lon, attributes }]
+  }))
+}));
+
+            <h3>Layer Management Hook</h3>
+            <div class="code-block">
+// Custom Hook for Layer Management
+export function useMapLayers({ view, appliedLayers }) {
+  const [isMapLoading, setIsMapLoading] = useState(false);
+  
+  // Process layer changes efficiently
+  const processLayerChanges = async () => {
+    const { added, removed, updated } = findLayerDifferences(oldLayers, newLayers);
+    
+    // Batch operations for performance
+    await Promise.all([
+      ...removed.map(layer => removeLayer(layer)),
+      ...added.map(layer => addLayer(layer)),
+      ...updated.map(layer => updateLayer(layer))
+    ]);
+  };
+  
+  return { isMapLoading };
+}
+            </div>
+
+            <h3>State Management</h3>
+            <div class="code-block">
+// Zustand Store for Map State
+export const useMapStore = create<MapStore>((set, get) => ({
+  center: { lat: 0, lng: 0 },
+  zoom: 10,
+  baseMapId: null,
+  appliedLayersData: "",
+  parcelPins: [],
+  
+  updateMapState: (zoom, center, boundingBox, mapScale) => set({
+    zoom, center, boundingBox, mapScale
+  }),
+  
+  addParcelPin: (parcelId, lat, lon, attributes) => set(state => ({
+    parcelPins: [...state.parcelPins, { parcelId, lat, lon, attributes }]
+  }))
+}));
+
+            <h3>👥 User Workflow & Experience</h3>
+            <div class="info-box">
+                <h4>Complete User Journey</h4>
+                <p>This section explains how users interact with the application, from initial login to advanced layer management and analysis.</p>
+            </div>
+
+            <div class="data-flow-grid">
+                <div class="data-flow-item">
+                    <h4>🚀 Getting Started</h4>
+                    <ul>
+                        <li>User logs in to the application</li>
+                        <li>Default map loads with basemap</li>
+                        <li>User sees available tools and layers</li>
+                        <li>Initial view shows default extent</li>
+                        <li>User can start exploring immediately</li>
+                    </ul>
+                </div>
+                <div class="data-flow-item">
+                    <h4>🗂️ Adding Layers</h4>
+                    <ul>
+                        <li>Click "Add Layers" button</li>
+                        <li>Browse ArcGIS Online catalog</li>
+                        <li>Search for specific layers</li>
+                        <li>Preview layer content</li>
+                        <li>Add layer to map</li>
+                    </ul>
+                </div>
+                <div class="data-flow-item">
+                    <h4>⚙️ Configuring Layers</h4>
+                    <ul>
+                        <li>Right-click layer for options</li>
+                        <li>Adjust transparency and visibility</li>
+                        <li>Configure popup information</li>
+                        <li>Set layer filters and queries</li>
+                        <li>Customize rendering styles</li>
+                    </ul>
+                </div>
+                <div class="data-flow-item">
+                    <h4>🔍 Interactive Analysis</h4>
+                    <ul>
+                        <li>Click features for detailed info</li>
+                        <li>Measure distances and areas</li>
+                        <li>Query features by attributes</li>
+                        <li>Export data and results</li>
+                        <li>Save analysis configurations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>🎯 Key User Interactions</h3>
+            <div class="code-block">
+// User Interaction Examples
+const handleLayerInteraction = {
+  // Layer visibility toggle
+  toggleVisibility: (layerId) => {
+    const layer = view.map.findLayerById(layerId);
+    layer.visible = !layer.visible;
+  },
+  
+  // Layer opacity adjustment
+  setOpacity: (layerId, opacity) => {
+    const layer = view.map.findLayerById(layerId);
+    layer.opacity = opacity;
+  },
+  
+  // Feature selection
+  selectFeature: (feature) => {
+    view.highlight(feature);
+    showPopup(feature);
+  },
+  
+  // Map navigation
+  navigateTo: (extent) => {
+    view.goTo(extent, { duration: 1000 });
+  }
+};
+
+        <div class="section" id="setup">
+            <h2>Setup & Configuration</h2>
+            
+            <h3>Prerequisites</h3>
+            <div class="info-box">
+                <ul style="margin-left: 20px;">
+                    <li>Node.js 18+ and npm</li>
+                    <li>ArcGIS Developer Account</li>
+                    <li>Valid API Key for ArcGIS Services</li>
+                    <li>Modern web browser with ES6+ support</li>
+                </ul>
+            </div>
+
+            <h3>Installation Steps</h3>
+            <div class="code-block">
+# 1. Clone the repository
+git clone [repository-url]
+cd project-name
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment variables
+cp .env.example .env.local
+
+# 4. Add your ArcGIS API key
+VITE_ARCGIS_API_KEY=your_api_key_here
+VITE_DEFAULT_WEBMAP_ID=your_webmap_id
+
+# 5. Start development server
+npm run dev
+            </div>
+
+            <h3>Environment Configuration</h3>
+            <div class="code-block">
+# Required Environment Variables
+VITE_ARCGIS_API_KEY=your_arcgis_api_key
+VITE_DEFAULT_WEBMAP_ID=your_default_webmap_id
+VITE_API_BASE_URL=your_api_base_url
+VITE_GOOGLE_API_KEY=your_google_api_key
+            </div>
+        </div>
+
+        <div class="section" id="api-reference">
+            <h2>API Reference</h2>
+            
+            <h3>ArcGIS Core SDK Integration</h3>
+            <div class="code-block">
+// Core ArcGIS imports
+import MapView from "@arcgis/core/views/MapView";
+import WebMap from "@arcgis/core/WebMap";
+import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
+import PopupTemplate from "@arcgis/core/PopupTemplate";
+import Graphic from "@arcgis/core/Graphic";
+
+// Map initialization
+const mapView = new MapView({
+  container: "mapDiv",
+  map: new WebMap({ portalItem: { id: "webmapId" } }),
+  zoom: 10,
+  center: [-118.244, 34.052]
+});
+            </div>
+
+            <h3>Custom Hooks API</h3>
+            <div class="table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Hook</th>
+                            <th>Purpose</th>
+                            <th>Returns</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>useMapLayers</td>
+                            <td>Layer management and rendering</td>
+                            <td>{ isMapLoading }</td>
+                        </tr>
+                        <tr>
+                            <td>useMapStore</td>
+                            <td>Map state management</td>
+                            <td>Map state and actions</td>
+                        </tr>
+                        <tr>
+                            <td>useLayerFilters</td>
+                            <td>Layer filtering capabilities</td>
+                            <td>Filter functions</td>
+                        </tr>
+                        <tr>
+                            <td>useMapExtentFilter</td>
+                            <td>Map extent filtering</td>
+                            <td>Extent filter functions</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    <div class="footer">
+        <div class="container">
+            <h3>ArcGIS Core SDK - Technical Documentation</h3>
+            <p>Built with the latest ArcGIS Core SDK v4.33.6</p>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scrolling for table of contents
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add active state to navigation
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.toc a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 60) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.style.color = '#374151';
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.style.color = '#2F45FF';
+                    link.style.fontWeight = '600';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

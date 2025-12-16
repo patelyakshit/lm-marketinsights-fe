@@ -1,0 +1,47 @@
+import React from "react";
+
+interface CollapseIconProps {
+  size?: number;
+  color?: string;
+  className?: string;
+}
+
+const CollapseIcon: React.FC<CollapseIconProps> = ({
+  size = 20,
+  className = "",
+}) => {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      <path
+        d="M17.5 9.16667C17.5 6.02397 17.5 4.45262 16.5237 3.47631C15.5474 2.5 13.976 2.5 10.8333 2.5H9.16667C6.02397 2.5 4.45262 2.5 3.47631 3.47631C2.5 4.45262 2.5 6.02397 2.5 9.16667V10.8333C2.5 13.976 2.5 15.5474 3.47631 16.5237C4.45262 17.5 6.02397 17.5 9.16667 17.5H10.8333C13.976 17.5 15.5474 17.5 16.5237 16.5237C17.5 15.5474 17.5 13.976 17.5 10.8333V9.16667Z"
+        stroke="#7E7977"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7.5 2.5V17.5"
+        stroke="#7E7977"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13.3333 7.5L12.4098 8.23223C11.3588 9.06558 10.8333 9.48225 10.8333 10C10.8333 10.5177 11.3588 10.9344 12.4098 11.7677L13.3333 12.5"
+        stroke="#7E7977"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+};
+
+export default CollapseIcon;

@@ -1,0 +1,294 @@
+/* html,
+body,
+#root {
+  height: 100%;
+  margin: 1px;
+  padding: 1px;
+} */
+
+@custom-variant dark (&:is(.dark *));
+.ai-border-gradient {
+  border: 4px solid;
+  border-image-source: linear-gradient(
+    270deg,
+    rgba(12, 14, 255, 0.6) 0%,
+    rgba(86, 118, 255, 0.6) 51.5%,
+    rgba(255, 140, 0, 0.6) 100%
+  );
+  border-image-slice: 1;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px; /* optional, to match Tailwind's rounded */
+}
+.slider-root > div:first-child {
+  height: 8px;
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+}
+
+/* Active Range (Blue part) */
+.slider-root > div:nth-child(2) {
+  height: 8px;
+  background-color: #2563eb;
+  border-radius: 9999px;
+}
+
+/* Thumbs (Handles) */
+.slider-root > span {
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border: 2px solid #2563eb;
+  box-shadow: 0px 0px 4px rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+}
+
+/* Transparency Slider Styles */
+.slider-thumb::-webkit-slider-thumb {
+  appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #2f45ff;
+  cursor: pointer;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slider-thumb::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid #2f45ff;
+  cursor: pointer;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+img[src$=".svg"] {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ArcGIS Popup Scrolling Styles */
+.esri-popup__main-container {
+  max-height: 400px !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.esri-popup__content {
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.esri-feature__content-element {
+  overflow-y: auto !important;
+  max-height: 280px !important;
+}
+
+.esri-feature-table {
+  width: 100% !important;
+  overflow-y: auto !important;
+}
+
+/* Responsive popup adjustments */
+@media (max-width: 768px) {
+  .esri-popup__main-container {
+    max-height: 60vh !important;
+  }
+
+  .esri-popup__content {
+    max-height: 50vh !important;
+  }
+
+  .esri-feature__content-element {
+    max-height: 45vh !important;
+  }
+}
+
+@media (max-height: 600px) {
+  .esri-popup__main-container {
+    max-height: 70vh !important;
+  }
+
+  .esri-popup__content {
+    max-height: 60vh !important;
+  }
+}
+
+/* CSS Variables - Streamlined version */
+
+:root {
+  /* Base radius */
+  --radius: 0.625rem;
+
+  /* Base theme colors */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --pargo-red: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
+  /* Chart colors */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Sidebar colors */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* pargo-red colors from Figma */
+  --pargo-red-50: #f8f9fc; /* F8F9FC */
+  --pargo-red-100: #fef3f2; /* FEF3F2 */
+  --pargo-red-200: #e2e8f0; /* E2E8F0 */
+  --pargo-red-300: #cbd5e1; /* CBD5E1 */
+  --pargo-red-400: #94a3b8; /* 94A3B8 */
+  --pargo-red-500: #647488; /* 647488 */
+  --pargo-red-600: #475569; /* 475569 */
+  --pargo-red-700: #334155; /* 334155 */
+  --pargo-red-800: #1e293b; /* 1E293B */
+  --pargo-red-900: #0f172a; /* 0F172A */
+  --pargo-red-950: #020617; /* 020617 */
+
+  /* pargo-orange colors from Figma */
+  --pargo-orange-50: #f8f9fc; /* F8F9FC */
+  --pargo-orange-100: #fef3f2; /* FEF3F2 */
+  --pargo-orange-200: #e2e8f0; /* E2E8F0 */
+  --pargo-orange-300: #cbd5e1; /* CBD5E1 */
+  --pargo-orange-400: #94a3b8; /* 94A3B8 */
+  --pargo-orange-500: #647488; /* 647488 */
+  --pargo-orange-600: #475569; /* 475569 */
+  --pargo-orange-700: #334155; /* 334155 */
+  --pargo-orange-800: #1e293b; /* 1E293B */
+  --pargo-orange-900: #0f172a; /* 0F172A */
+  --pargo-orange-950: #020617; /* 020617 */
+
+  /* Base Gray colors from Figma */
+  --pargo-gray-50: #f8f9fc; /* F8F9FC */
+  --pargo-gray-100: #f1f5f9; /* F1F5F9 */
+  --pargo-gray-200: #e2e8f0; /* E2E8F0 */
+  --pargo-gray-300: #cbd5e1; /* CBD5E1 */
+  --pargo-gray-400: #94a3b8; /* 94A3B8 */
+  --pargo-gray-500: #647488; /* 647488 */
+  --pargo-gray-600: #475569; /* 475569 */
+  --pargo-gray-700: #334155; /* 334155 */
+  --pargo-gray-800: #1e293b; /* 1E293B */
+  --pargo-gray-900: #0f172a; /* 0F172A */
+  --pargo-gray-950: #020617; /* 020617 
+
+  /* ParGo Blue (Primary Blue) colors from Figma */
+  --pargo-blue-50: #e8f3ff; /* E8F3FF */
+  --pargo-blue-100: #d9e9ff; /* D9E9FF */
+  --pargo-blue-200: #b3ccff; /* B3CCFF */
+  --pargo-blue-300: #8badff; /* 8BADFF */
+  --pargo-blue-400: #5d93ff; /* 5D93FF */
+  --pargo-blue-500: #3274ff; /* 3274FF */
+  --pargo-blue-600: #0046ff; /* 0046FF */
+  --pargo-blue-700: #0000ff; /* 0000FF */
+  --pargo-blue-800: #0000af; /* 0000AF */
+  --pargo-blue-900: #00005f; /* 00005F */
+  --pargo-blue-950: #000035; /* 000035 */
+
+  /* pargo-green colors from Figma (renamed from Secondary Green) */
+  --pargo-green-50: #f8f9fc; /* F8F9FC */
+  --pargo-green-100: #f1f5f9; /* F1F5F9 */
+  --pargo-green-200: #e2e8f0; /* E2E8F0 */
+  --pargo-green-300: #cbd5e1; /* CBD5E1 */
+  --pargo-green-400: #94a3b8; /* 94A3B8 */
+  --pargo-green-500: #647488; /* 647488 */
+  --pargo-green-600: #475569; /* 475569 */
+  --pargo-green-700: #334155; /* 334155 */
+  --pargo-green-800: #1e293b; /* 1E293B */
+  --pargo-green-900: #0f172a; /* 0F172A */
+  --pargo-green-950: #020617; /* 020617 */
+
+  /* White and Black with Alpha */
+  --white: #ffffff; /* FFFFFF */
+  --white-alpha-00: rgba(255, 255, 255, 0.05);
+  --white-alpha-01: rgba(255, 255, 255, 0.1);
+  --white-alpha-02: rgba(255, 255, 255, 0.2);
+  --white-alpha-03: rgba(255, 255, 255, 0.3);
+  --white-alpha-04: rgba(255, 255, 255, 0.4);
+  --white-alpha-05: rgba(255, 255, 255, 0.5);
+
+  --black: #000000; /* 000000 */
+  --black-alpha-00: rgba(0, 0, 0, 0.05);
+  --black-alpha-01: rgba(0, 0, 0, 0.1);
+  --black-alpha-02: rgba(0, 0, 0, 0.2);
+  --black-alpha-03: rgba(0, 0, 0, 0.3);
+  --black-alpha-04: rgba(0, 0, 0, 0.4);
+  --black-alpha-05: rgba(0, 0, 0, 0.5);
+}
+
+.dark {
+  /* Base theme colors for dark mode */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --pargo-red: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  /* Chart colors for dark mode */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Sidebar colors for dark mode */
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}

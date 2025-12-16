@@ -1,0 +1,3 @@
+# Ignore documentation files that may have formatting issues
+docs/
+*.html

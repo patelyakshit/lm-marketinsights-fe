@@ -1,0 +1,221 @@
+name: CI/CD - Vite React Project
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - qa
+      - uat
+      - main
+  push:
+    branches:
+      - dev
+      - qa
+      - uat
+      - main
+
+env:
+  ACTIONS_STEP_DEBUG: ${{ github.ref_name != 'main' }}
+
+jobs:
+  precheck-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        client: [default, tommy, bully]
+
+    environment: ${{ github.event_name == 'push' && github.ref_name || '' }}
+
+    env:
+      # Frontend secrets
+      VITE_WIDGET_ID: ${{ secrets.VITE_WIDGET_ID }}
+      VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+      VITE_SOCKET_BASE: ${{ secrets.VITE_SOCKET_BASE }}
+      VITE_SOCKET_VOICE: ${{ secrets.VITE_SOCKET_VOICE }}
+      VITE_ARCGIS_API_KEY: ${{ secrets.VITE_ARCGIS_API_KEY }}
+      VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+      VITE_CURATED_LAYERS_ID: ${{ secrets.VITE_CURATED_LAYERS_ID }}
+      VITE_ARCGIS_LIVING_ATLAS_ID: ${{ secrets.VITE_ARCGIS_LIVING_ATLAS_ID }}
+
+      # Backend/build secrets
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+      SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+
+      STORAGE_KEY_default: ${{ secrets.AZURE_STORAGE_ACCOUNT }}
+      SAS_TOKEN_default: ${{ secrets.AZURE_SAS_TOKEN }}
+      VITE_WEBMAP_ID_default: ${{ secrets.VITE_DEFAULT_WEBMAP_ID }}
+
+      STORAGE_KEY_tommy: ${{ secrets.AZURE_STORAGE_ACCOUNT_TOMMY_QA }}
+      SAS_TOKEN_tommy: ${{ secrets.AZURE_SAS_TOKEN_TOMMY_QA }}
+      VITE_WEBMAP_ID_tommy: ${{ secrets.VITE_WEBMAP_ID_TOMMY_QA }}
+
+      STORAGE_KEY_bully: ${{ secrets.AZURE_STORAGE_ACCOUNT_BULLY_QA }}
+      SAS_TOKEN_bully: ${{ secrets.AZURE_SAS_TOKEN_BULLY_QA }}
+      VITE_WEBMAP_ID_bully: ${{ secrets.VITE_WEBMAP_ID_BULLY_QA }}
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        with:
+          node-version: 18
+
+      - name: Configure Client Environment
+        id: config
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: |
+          CLIENT="${{ matrix.client }}"
+          echo "Configuring environment for client: $CLIENT"
+
+          # Dynamic Variable Lookup
+          # We construct the var name (e.g., STORAGE_KEY_tommy) and read its value
+          VAR_STORAGE="STORAGE_KEY_$CLIENT"
+          VAR_SAS="SAS_TOKEN_$CLIENT"
+          VAR_WEBMAP_ID="VITE_WEBMAP_ID_$CLIENT"
+
+          # Export to GITHUB_ENV so subsequent steps see the standard names
+          echo "AZURE_STORAGE_ACCOUNT=${!VAR_STORAGE}" >> $GITHUB_ENV
+          echo "AZURE_SAS_TOKEN=${!VAR_SAS}" >> $GITHUB_ENV
+          echo "VITE_DEFAULT_WEBMAP_ID=${!VAR_WEBMAP_ID}" >> $GITHUB_ENV
+
+          # Output for debugging (masking secrets automatically)
+          echo "✅ Mapped Azure secrets for $CLIENT"
+
+      # Cache npm for all runs (PR + push)
+      - name: Cache npm
+        uses: actions/cache@v3
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # Cache Vite build only on push
+      - name: Cache Vite (push only)
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules/.vite
+            node_modules/.cache/vite
+          key: vite-cache-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            vite-cache-${{ github.ref_name }}-
+
+      - name: Install dependencies
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: npm install
+
+      - name: Validate required secrets
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: |
+          required_secrets=(
+            "SENTRY_AUTH_TOKEN"
+            "SENTRY_ORG"
+            "SENTRY_PROJECT"
+            "AZURE_STORAGE_ACCOUNT"
+            "AZURE_SAS_TOKEN"
+          )
+          for secret in "${required_secrets[@]}"; do
+            if [ -z "${!secret}" ]; then
+              echo "❌ Required secret $secret is missing"
+              exit 1
+            else
+              echo "✅ Secret $secret is available"
+            fi
+          done
+
+          if [ -z "$(printenv | grep '^VITE_')" ]; then
+            echo "❌ No VITE_* secrets found"
+            exit 1
+          else
+            echo "✅ Found VITE_* secrets"
+          fi
+
+      - name: Lint code
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: npm run lint || (echo "Linting failed, attempting to fix..." && npm run lint:fix && echo "Lint fixes applied, re-running lint..." && npm run lint)
+
+      - name: Type check
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: npm run type-check
+
+      - name: Format code
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: npm run format || (echo "Formatting failed, attempting to fix..." && npm run format -- --write && echo "Code formatted successfully")
+
+      - name: Build project
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: |
+          # Export all VITE_* secrets dynamically
+          for secret in $(printenv | grep '^VITE_' | cut -d= -f1); do
+            export "$secret=${!secret}"
+          done
+
+          # Set VITE_APP_ENV based on PR or push
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            export VITE_APP_ENV="pr-check"
+          else
+            export VITE_APP_ENV="${GITHUB_REF_NAME}"
+          fi
+
+          npm run build
+
+      - name: Verify dist folder
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: |
+          if [ ! -d "./dist" ] || [ -z "$(ls -A ./dist)" ]; then
+            echo "❌ dist folder is empty! Build failed."
+            exit 1
+          fi
+          echo "✅ dist folder verified:"
+          ls -la ./dist
+
+      # New: Run Sentry release commands using Node (npx works here)
+      - name: Create Sentry Release
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: |
+          VERSION=$GITHUB_SHA
+          ENVIRONMENT=${{ github.ref_name }}
+
+          echo "Creating Sentry release $VERSION for $ENVIRONMENT"
+          npx sentry-cli releases new $VERSION
+          npx sentry-cli releases set-commits $VERSION --auto
+          npx sentry-cli releases files $VERSION upload-sourcemaps ./dist --url-prefix "~/"
+          npx sentry-cli releases finalize $VERSION
+          npx sentry-cli releases deploys $VERSION new -e $ENVIRONMENT
+
+      # Azure CLI step only uploads build artifacts
+      - name: Deploy to Azure
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            VERSION=$GITHUB_SHA
+            ENVIRONMENT=${{ github.ref_name }}
+
+            echo "Deploying version $VERSION to $ENVIRONMENT"
+
+            az storage blob upload-batch \
+              --account-name "${AZURE_STORAGE_ACCOUNT}" \
+              --sas-token "${AZURE_SAS_TOKEN}" \
+              --destination '$web' \
+              --source ./dist \
+              --overwrite
+
+      - name: Job Summary
+        if: ${{ (matrix.client == 'default' && github.event_name == 'push') || (github.event_name == 'push' && github.ref_name == 'qa') }}
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** $GITHUB_SHA" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Successfully Deployed" >> $GITHUB_STEP_SUMMARY

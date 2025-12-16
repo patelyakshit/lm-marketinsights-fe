@@ -1,0 +1,161 @@
+@import "https://js.arcgis.com/4.27/esri/themes/light/main.css";
+@import "tailwindcss";
+
+/* Resize handle styles */
+.resize-handle {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.resize-handle:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Prevent text selection during resize */
+.resizing {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  cursor: grabbing !important;
+}
+
+.resizing * {
+  cursor: grabbing !important;
+}
+
+/* Sidebar container */
+.sidebar-container {
+  min-width: 350px;
+  max-width: 50vw;
+}
+
+/* Chat container */
+.chat-container {
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Accordion container */
+.accordion-container {
+  transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.accordion-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.accordion-content {
+  animation: accordionSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes accordionSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Horizontal resize handle for height adjustment */
+.cursor-ns-resize {
+  cursor: ns-resize !important;
+}
+
+/* Scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 640px) {
+  .sidebar-container {
+    min-width: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .resize-handle {
+    display: none !important;
+  }
+
+  .chat-container {
+    min-height: 150px !important;
+  }
+
+  .accordion-container {
+    max-height: 50vh !important;
+  }
+}
+
+/* Tablet Responsive Styles */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .sidebar-container {
+    min-width: 350px;
+    max-width: 60vw;
+  }
+
+  .chat-container {
+    min-height: 180px !important;
+  }
+}
+
+/* Desktop Responsive Styles */
+@media (min-width: 1025px) {
+  .sidebar-container {
+    min-width: 400px;
+    max-width: 50vw;
+  }
+
+  .chat-container {
+    min-height: 200px !important;
+  }
+}
+
+/* Prevent layout shift during resize */
+.sidebar-container,
+.chat-container,
+.accordion-container {
+  box-sizing: border-box;
+}
+
+/* Map container responsive */
+@media (max-width: 640px) {
+  .flex.flex-1.overflow-hidden.p-3 {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+
+  /* Map container on mobile */
+  .flex.flex-1.overflow-hidden.p-3 > div:last-child {
+    margin-top: 1rem;
+    height: 50vh;
+  }
+}

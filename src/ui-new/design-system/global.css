@@ -1,0 +1,461 @@
+/**
+ * Global Styles for ui-new Design System
+ * This file contains global font loading and base styles for the new UI
+ */
+
+/* Switzer Font Loading */
+/* Load from CDN - Switzer font */
+@import url('https://api.fontshare.com/v2/css?f[]=switzer@400,500,600,700&display=swap');
+
+/* Alternative: If using local font files, uncomment and update paths:
+@font-face {
+  font-family: 'Switzer';
+  src: url('./assets/fonts/Switzer-Regular.woff2') format('woff2'),
+       url('./assets/fonts/Switzer-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Switzer';
+  src: url('./assets/fonts/Switzer-Medium.woff2') format('woff2'),
+       url('./assets/fonts/Switzer-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Switzer';
+  src: url('./assets/fonts/Switzer-Semibold.woff2') format('woff2'),
+       url('./assets/fonts/Switzer-Semibold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/* Global Font Application for ui-new components */
+/* Apply Switzer to all elements within ui-new scope */
+body,
+html {
+  font-family: 'Switzer', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[class*="ui-new"],
+.ui-new * {
+  font-family: 'Switzer', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Base Typography Reset */
+.ui-new-base {
+  font-family: 'Switzer', sans-serif;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* Sign In Form Styles */
+.signin-form {
+  width: 100%;
+  height: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1440px) {
+  .signin-form {
+    width: 620px;
+    height: 100%;
+    max-width: 620px;
+  }
+}
+
+/* Large Devices (Tablets Landscape / Small Laptops) */
+@media (min-width: 993px) and (max-width: 1439px) {
+  .signin-form {
+    width: 100%;
+    max-width: 620px;
+    height: 100%;
+  }
+}
+
+@media (max-width: 992px) {
+  .signin-form {
+    width: 100%;
+    max-width: 620px;
+    height: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .signin-form {
+    width: 100%;
+    max-width: 100%;
+    padding: 24px 16px;
+    min-height: 100vh;
+  }
+}
+
+/* Sign In Form Typography */
+.signin-form-heading {
+  font-family: 'Switzer', sans-serif;
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 40px;
+  letter-spacing: -0.32px;
+  color: #1d1916;
+  margin: 0;
+}
+
+.signin-form-subtitle {
+  font-family: 'Switzer', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+  letter-spacing: -0.096px;
+  color: #7e7977;
+  margin: 0;
+}
+
+.signin-form-label-medium {
+  font-family: 'Switzer', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #2a2623;
+}
+
+.signin-form-label-regular {
+  font-family: 'Switzer', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #2a2623;
+}
+
+.signin-form-brand-text {
+  font-family: 'Switzer', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #1d1916;
+}
+
+.signin-form-footer-text {
+  font-family: 'Switzer', sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.084px;
+  color: #545251;
+}
+
+.signin-form-link {
+  color: #1d1916;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-position: from-font;
+}
+
+.signin-form-button {
+  height: 40px;
+  border-radius: 6px;
+  background-color: #1d1916;
+  color: #ffffff;
+  font-family: 'Switzer', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  letter-spacing: -0.096px;
+}
+
+.signin-form-input {
+  height: 40px;
+  border-radius: 6px;
+  border-color: #eceae9;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.signin-form-input:focus {
+  border-color: #1d1916 !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.signin-form-input-error {
+  height: 40px;
+  border-radius: 6px;
+  border-color: #fb3748 !important;
+}
+
+/* Validation Error Styles */
+.signin-form-error-hint {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.signin-form-error-text {
+  font-family: 'Inter', 'Switzer', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #fb3748;
+  flex: 1;
+}
+
+.signin-form-error-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Orange link variant for Sign in/Sign up links */
+.signin-form-signup-link-orange {
+  color: #de6700;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-position: from-font;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.signin-form-divider {
+  flex: 1 1 0;
+  height: 1px;
+  background-color: #eceae9;
+}
+
+.signin-form-signup-link {
+  color: #1d1916;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-position: from-font;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.signin-form-signup-text {
+  color: #545251;
+}
+
+.signin-form-eye-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+}
+
+/* Sign In Page Container Styles */
+.signin-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+.signin-form-wrapper {
+  flex-shrink: 0;
+  width: 620px;
+  height: 100vh;
+  max-width: 620px;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.signin-hero-wrapper {
+  flex: 1;
+  height: 100vh;
+}
+
+/* Large Devices (Tablets Landscape / Small Laptops) */
+@media (min-width: 993px) and (max-width: 1439px) {
+  .signin-container {
+    flex-direction: row;
+    min-height: 100vh;
+    height: 100vh;
+  }
+  .signin-form-wrapper {
+    flex-shrink: 0;
+    width: 50%;
+    min-width: 400px;
+    max-width: 620px;
+    height: 100vh;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+  .signin-hero-wrapper {
+    flex: 1;
+    min-width: 50%;
+    height: 100vh;
+  }
+}
+
+@media (max-width: 992px) {
+  .signin-container {
+    flex-direction: column;
+    min-height: auto;
+    height: auto;
+    overflow: auto;
+  }
+  .signin-form-wrapper {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+  }
+  .signin-hero-wrapper {
+    width: 100%;
+    height: 600px;
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .signin-form-wrapper {
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+  }
+  .signin-hero-wrapper {
+    height: 500px;
+  }
+}
+
+/* Auth Hero Styles */
+.auth-hero {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 80px;
+}
+
+.auth-hero-background {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.auth-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(12, 10, 8, 0) 0%, rgba(12, 10, 8, 1) 100%);
+}
+
+.auth-hero-text-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.auth-hero-text {
+  font-family: 'Switzer', sans-serif;
+  font-weight: 500;
+  font-size: 56px;
+  line-height: 1.25;
+  margin: 0;
+  background: linear-gradient(180deg, #ffffff 0%, #FFA36D 45%, #FF7700 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Auth Hero Responsive Styles */
+@media (max-width: 1200px) {
+  .auth-hero {
+    padding: 60px;
+  }
+  .auth-hero-text {
+    font-size: 48px;
+  }
+}
+
+@media (max-width: 992px) {
+  .auth-hero {
+    padding: 40px;
+  }
+  .auth-hero-text {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .auth-hero {
+    padding: 24px;
+  }
+  .auth-hero-text {
+    font-size: 32px;
+    line-height: 1.2;
+  }
+}
+
+/* Accordion Icon Wrapper Styles */
+.accordion-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 1px solid transparent;
+}
+
+.accordion-icon-wrapper:hover {
+  /* border: 1px solid var(--neutral-300, #D5D3D2); */
+  border-radius: 4px;
+    background: var(--neutral-200, #ECEAE9);
+  /* background: var(--neutral-100, #F3F2F2); */
+  box-shadow: 0 1px 2px 0 rgba(10, 13, 20, 0.03);
+}
+
+/* Accordion Header Styles */
+.accordion-header {
+  border-bottom: 1px solid var(--neutral-300, #D5D3D2);
+  transition: border-color 0.2s ease-in-out;
+}
+
+.accordion-header:hover {
+  border-bottom: 1px solid var(--neutral-200, #ECEAE9);
+}
+
+.accordion-header.cursor-pointer {
+  cursor: pointer;
+}
+

@@ -1,0 +1,5 @@
+echo "Running pre-commit checks..."
+
+echo "Linting & formatting your codebase..."
+npx lint-staged
+
