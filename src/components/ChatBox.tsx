@@ -14,6 +14,7 @@ import { useTabContext } from "../hooks/useTabContext";
 import { useVoiceMode } from "../hooks/useVoiceMode";
 import { useWebSocketVoiceMode } from "../hooks/useWebSocketVoiceMode";
 import { useWidgetInfo } from "../hooks/useWidgetInfo";
+import { useViewModeOptional } from "../contexts/ViewModeContext";
 import { AppliedLayer } from "../schema";
 import { useMapStore } from "../store/useMapStore";
 import {
@@ -162,6 +163,7 @@ const ChatBox: React.FC = () => {
   } = usePromptContext();
   const { setActiveArtifact } = useArtifactStore();
   const { selectTab } = useTabContext();
+  const viewModeContext = useViewModeOptional();
   const {
     isMapReady,
     mapView,
@@ -534,6 +536,16 @@ const ChatBox: React.FC = () => {
               }
             }
 
+            return;
+          }
+
+          // Handle AI hint for map-related queries (server-side fallback)
+          // This is sent by the AI when it detects the response will involve map operations
+          // but the client-side keyword detection didn't catch it
+          if (data.type === "CHAT/MAP_HINT") {
+            if (viewModeContext?.handleMapHint) {
+              viewModeContext.handleMapHint();
+            }
             return;
           }
 
@@ -997,6 +1009,11 @@ const ChatBox: React.FC = () => {
             console.log("All operations are: ", operations);
 
             operations.forEach((operation) => {
+              // Auto-switch to split view if this is a map operation and we're in chat view
+              if (viewModeContext?.ensureMapVisible) {
+                viewModeContext.ensureMapVisible(operation.type);
+              }
+
               switch (operation.type) {
                 case "PLACESTORY_STATUS": {
                   const payload = operation.payload;
@@ -2070,6 +2087,12 @@ const ChatBox: React.FC = () => {
       }
 
       setError(null);
+
+      // Check if message contains map-related keywords and switch to split view if needed
+      // This provides instant feedback before waiting for AI response
+      if (viewModeContext?.checkMessageIntent) {
+        viewModeContext.checkMessageIntent(messageToSend);
+      }
 
       const newMessage: Message = {
         sender: "user",

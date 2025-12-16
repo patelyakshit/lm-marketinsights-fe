@@ -18,6 +18,7 @@ import ChatBox from "./components/ChatBox";
 import { TabProvider } from "./contexts/TabContext";
 import { WidgetInfoProvider } from "./contexts/WidgetInfoProvider";
 import { PromptProvider } from "./contexts/PromptContext";
+import { ViewModeProvider } from "./contexts/ViewModeContext";
 import { useArtifactStore } from "./store/useArtifactStore";
 import { ArtifactRoot } from "./artifacts/ArtifactRoot";
 import MapViewComponent from "./pages/MapView";
@@ -69,7 +70,9 @@ function App() {
               element={
                 <PromptProvider>
                   <TabProvider>
-                    <DashboardPage />
+                    <ViewModeProvider>
+                      <DashboardPage />
+                    </ViewModeProvider>
                   </TabProvider>
                 </PromptProvider>
               }

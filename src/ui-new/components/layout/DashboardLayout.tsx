@@ -89,33 +89,95 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     };
   }, [isResizing, isCollapsed]);
 
+  // Chat panel - always rendered once to preserve state, layout changes via CSS
   const renderChatPanel = () => {
-    if (viewMode === "canvas") return null;
+    const isFullScreen = viewMode === "chat";
+    const isSplit = viewMode === "split";
 
-    if (viewMode === "chat") {
-      return (
-        <div className="absolute inset-0 flex items-center justify-center z-10 bg-[#fdfcfc]">
-          <div className="w-full max-w-[740px] px-5">{chatComponent}</div>
-        </div>
-      );
-    }
+    // Dynamic styles based on view mode
+    const getChatContainerStyles = (): React.CSSProperties => {
+      if (isFullScreen) {
+        return {
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 10,
+          backgroundColor: "#fdfcfc",
+          opacity: 1,
+          pointerEvents: "auto",
+          transform: "translateX(0)",
+        };
+      }
+      if (isSplit) {
+        return {
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
+          width: `${chatWidth}px`,
+          zIndex: 10,
+          display: "flex",
+          flexDirection: "column",
+          opacity: 1,
+          pointerEvents: "auto",
+          transform: "translateX(0)",
+        };
+      }
+      // Canvas mode - hide chat with slide out animation
+      return {
+        position: "absolute",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: `${chatWidth}px`,
+        zIndex: 10,
+        display: "flex",
+        flexDirection: "column",
+        opacity: 0,
+        pointerEvents: "none",
+        transform: "translateX(-100%)",
+      };
+    };
+
+    const getChatInnerStyles = (): React.CSSProperties => {
+      if (isFullScreen) {
+        return {
+          width: "100%",
+          maxWidth: "740px",
+          padding: "0 20px",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        };
+      }
+      return {
+        flex: 1,
+        backgroundColor: "white",
+        borderRadius: "12px",
+        border: `1px solid ${colors.neutral[200]}`,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        margin: "12px",
+        marginBottom: "6px",
+      };
+    };
 
     return (
       <>
+        {/* Chat container - single instance, always mounted */}
         <div
-          className="absolute left-0 top-0 bottom-0 z-10 flex flex-col"
-          style={{ width: `${chatWidth}px` }}
+          className="transition-all duration-300 ease-in-out"
+          style={getChatContainerStyles()}
         >
-          {/* Chat Section */}
-          <div
-            className="flex-1 bg-white rounded-xl border overflow-hidden flex flex-col m-3 mb-1.5"
-            style={{ borderColor: colors.neutral[200] }}
-          >
+          <div style={getChatInnerStyles()}>
             {chatComponent}
           </div>
 
-          {/* Accordion Section (if provided) */}
-          {accordionComponent && (
+          {/* Accordion Section - only in split mode */}
+          {isSplit && accordionComponent && (
             <div
               className="shrink-0 bg-white rounded-xl border overflow-hidden m-3 mt-1.5"
               style={{
@@ -128,11 +190,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           )}
         </div>
 
+        {/* Resizable divider - only visible in split mode */}
         <div
-          className={`absolute top-0 bottom-0 z-20 flex items-center cursor-col-resize hover:bg-gray-100 transition-colors ${
+          className={`absolute top-0 bottom-0 z-20 flex items-center cursor-col-resize hover:bg-gray-100 transition-all duration-300 ${
             isResizing ? "bg-blue-50" : ""
           }`}
-          style={{ left: `${chatWidth}px`, width: "8px" }}
+          style={{
+            left: `${chatWidth}px`,
+            width: "8px",
+            opacity: isSplit ? 1 : 0,
+            pointerEvents: isSplit ? "auto" : "none",
+          }}
           onMouseDown={handleMouseDown}
           title="Drag to resize"
         >
