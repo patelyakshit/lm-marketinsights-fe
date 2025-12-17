@@ -28,3 +28,8 @@ export { default as ChatLandingPanel } from "./ChatLandingPanel";
 export { default as ChatContainer } from "./ChatContainer";
 export { default as ToolsInsightsPanel } from "./ToolsInsightsPanel";
 export { default as AddDataSidePanel } from "./AddDataSidePanel";
+export { default as StudioView } from "./StudioView";
+export type { MarketingPost, StudioViewProps } from "./StudioView";
+export { default as StudioContent } from "./StudioContent";
+export { default as LifestyleReportView } from "./LifestyleReportView";
+export type { LifestyleReportViewProps } from "./LifestyleReportView";

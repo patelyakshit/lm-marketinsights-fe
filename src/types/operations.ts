@@ -247,6 +247,83 @@ export interface PlaceStoryGeneratedPayload {
   placestory_blocks: PlacestoryBlock[];
 }
 
+// Marketing Post Operation Types
+export interface MarketingPostPayload {
+  id?: string;
+  platform: string;
+  headline: string;
+  caption: string;
+  hashtags: string[];
+  imageUrl?: string;
+  businessName?: string;
+  segmentName?: string;
+}
+
+export interface MarketingPostGeneratedOperation {
+  type: "MARKETING_POST_GENERATED";
+  payload: MarketingPostPayload;
+}
+
+export interface MarketingPostsGeneratedOperation {
+  type: "MARKETING_POSTS_GENERATED";
+  payload: {
+    posts: MarketingPostPayload[];
+    businessName?: string;
+    businessType?: string;
+  };
+}
+
+// Sent when marketing generation starts - opens Studio with skeleton loaders
+export interface MarketingGenerationStartedOperation {
+  type: "MARKETING_GENERATION_STARTED";
+  payload: {
+    posts: MarketingPostPayload[]; // Posts without images yet
+    businessName?: string;
+    businessType?: string;
+    message?: string;
+  };
+}
+
+export interface OpenStudioViewOperation {
+  type: "OPEN_STUDIO_VIEW";
+  payload: Record<string, never>;
+}
+
+// Lifestyle Report Operation Types
+export interface LifestyleSegment {
+  code: string;
+  name: string;
+  percentage: number;
+  householdCount: number;
+  lifemodeGroup: string;
+  urbanization: string;
+  medianAge?: number;
+  medianIncome?: number;
+  medianNetWorth?: number;
+  homeownershipRate?: number;
+  description: string;
+  characteristics: string[];
+  color: string;
+  insight: string;
+}
+
+export interface LifestyleReportPayload {
+  address: string;
+  latitude: number;
+  longitude: number;
+  totalHouseholds: number;
+  segments: LifestyleSegment[];
+  businessInsight: string;
+  generatedAt: string;
+  bufferMiles?: number;
+  driveTimeMinutes?: number;
+}
+
+export interface LifestyleReportGeneratedOperation {
+  type: "LIFESTYLE_REPORT_GENERATED";
+  payload: LifestyleReportPayload;
+}
+
 export type AllOperations =
   | ZoomToFeaturesOperation
   | ApplyFilterOperation
@@ -266,7 +343,12 @@ export type AllOperations =
   | SuggestPinOperation
   | PlotGeoJSONOperation
   | PlaceStoryStatusOperation
-  | PlaceStoryGeneratedOperation;
+  | PlaceStoryGeneratedOperation
+  | MarketingPostGeneratedOperation
+  | MarketingPostsGeneratedOperation
+  | MarketingGenerationStartedOperation
+  | OpenStudioViewOperation
+  | LifestyleReportGeneratedOperation;
 
 export type NewOperationType = AllOperations;
 

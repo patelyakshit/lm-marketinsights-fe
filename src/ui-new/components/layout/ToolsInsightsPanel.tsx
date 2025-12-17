@@ -18,8 +18,9 @@ import { Tooltip } from "../base";
 import AddDataSidePanel from "./AddDataSidePanel";
 import MapKeySidePanel from "./MapKeySidePanel";
 import ListContent from "./ListContent";
+import { useToolsPanelStore, ToolsPanelTab } from "../../../store/useToolsPanelStore";
 
-type TabType = "layers" | "analyze" | "list" | "map-key";
+type TabType = ToolsPanelTab;
 
 interface ToolsInsightsPanelProps {
   className?: string;
@@ -32,7 +33,7 @@ const ToolsInsightsPanel: React.FC<ToolsInsightsPanelProps> = ({
   isCollapsed = false,
   onToggleCollapse,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabType>("layers");
+  const { activeTab, setActiveTab } = useToolsPanelStore();
   const [isAddDataOpen, setIsAddDataOpen] = useState(false);
   const [isMapKeyOpen, setIsMapKeyOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
@@ -386,60 +387,62 @@ const ToolsInsightsPanel: React.FC<ToolsInsightsPanelProps> = ({
               {renderContent()}
             </div>
 
-            {/* Basemap Footer */}
-            <div
-              className="shrink-0"
-              style={{
-                height: "58px",
-                borderTop: "1px solid #eceae9",
-                backgroundColor: "#f8f7f7",
-              }}
-            >
-              <div className="flex items-center gap-3 h-full px-2.5 py-2.5">
-                <div
-                  className="shrink-0 w-9 h-full rounded overflow-hidden"
-                  style={{ boxShadow: "0 0 0 1px rgba(0,0,0,0.08)" }}
-                >
+            {/* Basemap Footer - Only show on Layers tab */}
+            {activeTab === "layers" && (
+              <div
+                className="shrink-0"
+                style={{
+                  height: "58px",
+                  borderTop: "1px solid #eceae9",
+                  backgroundColor: "#f8f7f7",
+                }}
+              >
+                <div className="flex items-center gap-3 h-full px-2.5 py-2.5">
                   <div
-                    className="w-full h-full"
-                    style={{
-                      backgroundColor: "#c4c4c4",
-                      backgroundImage:
-                        "linear-gradient(45deg, #a0a0a0 25%, transparent 25%), linear-gradient(-45deg, #a0a0a0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #a0a0a0 75%), linear-gradient(-45deg, transparent 75%, #a0a0a0 75%)",
-                      backgroundSize: "8px 8px",
-                      backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
-                    }}
-                  />
-                </div>
-                <div className="flex-1 flex flex-col gap-1 min-w-0">
-                  <span
-                    className="text-[10px] uppercase"
-                    style={{
-                      fontFamily: "Switzer, sans-serif",
-                      color: "#a6a3a0",
-                      letterSpacing: "0.6px",
-                      lineHeight: "12px",
-                    }}
+                    className="shrink-0 w-9 h-full rounded overflow-hidden"
+                    style={{ boxShadow: "0 0 0 1px rgba(0,0,0,0.08)" }}
                   >
-                    Current Basemap
-                  </span>
-                  <span
-                    className="text-[14px] truncate"
-                    style={{
-                      fontFamily: "Switzer, sans-serif",
-                      color: "#1d1916",
-                      letterSpacing: "-0.084px",
-                      lineHeight: "20px",
-                    }}
-                  >
-                    Light Gray Canvas
-                  </span>
+                    <div
+                      className="w-full h-full"
+                      style={{
+                        backgroundColor: "#c4c4c4",
+                        backgroundImage:
+                          "linear-gradient(45deg, #a0a0a0 25%, transparent 25%), linear-gradient(-45deg, #a0a0a0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #a0a0a0 75%), linear-gradient(-45deg, transparent 75%, #a0a0a0 75%)",
+                        backgroundSize: "8px 8px",
+                        backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 flex flex-col gap-1 min-w-0">
+                    <span
+                      className="text-[10px] uppercase"
+                      style={{
+                        fontFamily: "Switzer, sans-serif",
+                        color: "#a6a3a0",
+                        letterSpacing: "0.6px",
+                        lineHeight: "12px",
+                      }}
+                    >
+                      Current Basemap
+                    </span>
+                    <span
+                      className="text-[14px] truncate"
+                      style={{
+                        fontFamily: "Switzer, sans-serif",
+                        color: "#1d1916",
+                        letterSpacing: "-0.084px",
+                        lineHeight: "20px",
+                      }}
+                    >
+                      Light Gray Canvas
+                    </span>
+                  </div>
+                  <button className="shrink-0 w-5 h-5 flex items-center justify-center cursor-pointer">
+                    <ChevronRightIcon size={20} />
+                  </button>
                 </div>
-                <button className="shrink-0 w-5 h-5 flex items-center justify-center cursor-pointer">
-                  <ChevronRightIcon size={20} />
-                </button>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Add Data Panel - 50% width */}

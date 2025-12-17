@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 
-export type ViewMode = "chat" | "split" | "canvas";
+export type ViewMode = "chat" | "split" | "canvas" | "studio";
 
 // Operations that require the map to be visible
 const MAP_VISIBLE_OPERATIONS = new Set([
@@ -63,6 +63,8 @@ interface ViewModeContextType {
   checkMessageIntent: (message: string) => boolean;
   /** Handle AI hint from server (fallback for edge cases) */
   handleMapHint: () => void;
+  /** Switch to studio mode for marketing post generation/viewing */
+  openStudioView: () => void;
 }
 
 const ViewModeContext = createContext<ViewModeContextType | null>(null);
@@ -153,6 +155,12 @@ export function ViewModeProvider({
     }
   }, [viewMode]);
 
+  // Switch to studio mode for marketing post viewing/editing
+  const openStudioView = useCallback(() => {
+    console.log("[ViewMode] Opening studio view for marketing content");
+    setViewModeState("studio");
+  }, []);
+
   return (
     <ViewModeContext.Provider
       value={{
@@ -162,6 +170,7 @@ export function ViewModeProvider({
         isMapOperation,
         checkMessageIntent,
         handleMapHint,
+        openStudioView,
       }}
     >
       {children}

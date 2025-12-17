@@ -6,10 +6,12 @@ import {
   Sidebar,
   CanvasPanel,
   ChatContainer,
+  StudioView,
 } from "../components/layout";
 import { colors } from "../design-system";
 import { usePromptContext } from "../../hooks/usePromptContext";
 import { useViewMode, type ViewMode } from "../../contexts/ViewModeContext";
+import { useMarketingStore } from "../../store/useMarketingStore";
 
 const VIEW_MODE_STORAGE_KEY = "dashboard-view-mode";
 const SPLIT_WIDTH_STORAGE_KEY = "dashboard-split-width";
@@ -139,12 +141,52 @@ const DashboardPage: React.FC = () => {
     console.log("Profile clicked");
   }, []);
 
+  // Marketing store for studio view
+  const { posts, businessName } = useMarketingStore();
+
+  // Handle marketing post regeneration
+  const handleRegeneratePost = useCallback((postId: string) => {
+    console.log("Regenerate post:", postId);
+    // TODO: Implement regeneration via AI
+  }, []);
+
+  // Handle marketing post download
+  const handleDownloadPost = useCallback((postId: string) => {
+    const post = posts.find((p) => p.id === postId);
+    if (post?.imageUrl) {
+      const link = document.createElement("a");
+      link.href = post.imageUrl;
+      link.download = `${post.platform}-post-${Date.now()}.png`;
+      link.click();
+    }
+  }, [posts]);
+
   // All components are always rendered to preserve state
   // Visibility is controlled via CSS transitions
   const renderContent = () => {
     const isChat = viewMode === "chat";
     const isCanvas = viewMode === "canvas";
     const isSplit = viewMode === "split";
+    const isStudio = viewMode === "studio";
+
+    // Studio mode - full screen studio view
+    if (isStudio) {
+      return (
+        <div
+          ref={mainContentRef}
+          className="w-full h-full"
+          style={{ backgroundColor: "#fdfcfc" }}
+        >
+          <StudioView
+            posts={posts}
+            businessName={businessName || undefined}
+            onRegenerate={handleRegeneratePost}
+            onDownload={handleDownloadPost}
+            className="w-full h-full"
+          />
+        </div>
+      );
+    }
 
     return (
       <div
@@ -206,19 +248,22 @@ const DashboardPage: React.FC = () => {
           />
         </div>
 
-        {/* Canvas Panel - Always mounted, visibility controlled by CSS */}
+        {/* Canvas Panel - Always mounted at split-view size for proper map initialization */}
+        {/* In chat mode: same size as split mode but hidden with clip-path */}
+        {/* In split mode: visible at split-view position */}
+        {/* In canvas mode: expands to full width */}
         <div
-          className="absolute top-0 right-0 bottom-0 transition-all duration-300 ease-in-out"
+          className="absolute top-0 bottom-0 transition-all duration-300 ease-in-out"
           style={{
-            // Full screen in canvas mode
-            // Right panel in split mode
-            // Hidden in chat mode
-            width: isSplit ? `${100 - splitWidthPercent}%` : "100%",
-            left: isSplit ? `${splitWidthPercent}%` : "0",
+            // In chat/split: keep at split-view size so map doesn't need to resize
+            // In canvas: expand to full width
+            width: isCanvas ? "100%" : `${100 - splitWidthPercent}%`,
+            left: isCanvas ? "0" : `${splitWidthPercent}%`,
             opacity: isChat ? 0 : 1,
             pointerEvents: isChat ? "none" : "auto",
-            transform: isChat ? "translateX(100%)" : "translateX(0)",
             zIndex: isCanvas ? 10 : 5,
+            // Use clip-path to hide in chat mode - map renders at correct size but isn't visible
+            clipPath: isChat ? "inset(0 0 0 100%)" : "inset(0)",
           }}
         >
           <CanvasPanel className="w-full h-full" />

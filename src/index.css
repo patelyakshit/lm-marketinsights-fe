@@ -80,6 +80,26 @@ img[src$=".svg"] {
   -webkit-user-drag: none;
 }
 
+/* Skeleton shimmer animation for loading states */
+@keyframes skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: skeleton-shimmer 1.5s infinite;
+}
+
 /* ArcGIS Popup Scrolling Styles */
 .esri-popup__main-container {
   max-height: 400px !important;

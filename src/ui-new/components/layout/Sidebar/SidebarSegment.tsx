@@ -3,7 +3,10 @@ import { colors } from "../../../design-system";
 import { ChatIcon, SplitIcon, CanvasIcon } from "../../../assets/icons";
 import { Tooltip } from "../../base";
 
-export type ViewMode = "chat" | "split" | "canvas";
+export type ViewMode = "chat" | "split" | "canvas" | "studio";
+
+// Display modes for the segment (studio maps to split visually)
+type DisplayMode = "chat" | "split" | "canvas";
 
 interface SidebarSegmentProps {
   activeMode: ViewMode;
@@ -11,8 +14,13 @@ interface SidebarSegmentProps {
   isCollapsed?: boolean;
 }
 
+// When in studio mode, highlight split since that's the related view
+const getDisplayMode = (mode: ViewMode): DisplayMode => {
+  return mode === "studio" ? "split" : mode;
+};
+
 interface SegmentOption {
-  id: ViewMode;
+  id: DisplayMode;
   icon: React.ComponentType<{ size?: number; color?: string }>;
   label: string;
 }
@@ -22,6 +30,7 @@ const SidebarSegment: React.FC<SidebarSegmentProps> = ({
   onModeChange,
   isCollapsed = false,
 }) => {
+  const displayMode = getDisplayMode(activeMode);
   const options: SegmentOption[] = [
     { id: "chat", icon: ChatIcon, label: "Chat" },
     { id: "split", icon: SplitIcon, label: "Split" },
@@ -40,7 +49,7 @@ const SidebarSegment: React.FC<SidebarSegmentProps> = ({
           }}
         >
           {options.map((option) => {
-            const isActive = activeMode === option.id;
+            const isActive = displayMode === option.id;
             const Icon = option.icon;
 
             return (
@@ -93,7 +102,7 @@ const SidebarSegment: React.FC<SidebarSegmentProps> = ({
         }}
       >
         {options.map((option) => {
-          const isActive = activeMode === option.id;
+          const isActive = displayMode === option.id;
           const Icon = option.icon;
 
           return (

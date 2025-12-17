@@ -60,6 +60,10 @@ import VoiceModeIcon from "./svg/VoiceModeIcon";
 import { PlusIcon } from "../ui-new/assets/icons";
 import VoiceModeAnimation from "./VoiceModeAnimation";
 import { useArtifactStore } from "../store/useArtifactStore";
+import { useMarketingStore } from "../store/useMarketingStore";
+import { useLifestyleStore } from "../store/useLifestyleStore";
+import { useToolsPanelStore } from "../store/useToolsPanelStore";
+import { useCanvasStore } from "../store/useCanvasStore";
 import { DynamicChatInput } from "../ui-new/components/composite/DynamicChatInput";
 
 const SOCKET_URL_BASE = import.meta.env.VITE_SOCKET_BASE;
@@ -164,6 +168,10 @@ const ChatBox: React.FC = () => {
   const { setActiveArtifact } = useArtifactStore();
   const { selectTab } = useTabContext();
   const viewModeContext = useViewModeOptional();
+  const { addPostFromResponse, setBusinessInfo, startGeneration, completeGeneration } = useMarketingStore();
+  const { setReport: setLifestyleReport } = useLifestyleStore();
+  const { openAnalysisView } = useToolsPanelStore();
+  const { setActiveCanvasTab } = useCanvasStore();
   const {
     isMapReady,
     mapView,
@@ -1214,6 +1222,7 @@ const ChatBox: React.FC = () => {
                   controller.handleZoomToFeatures(operation.payload);
                   break;
                 case "APPLY_FILTER":
+                  console.log("[ChatBox] Received APPLY_FILTER:", operation.payload);
                   controller.applyFilter(
                     operation.payload.layerId,
                     operation.payload.whereClause,
@@ -1281,6 +1290,80 @@ const ChatBox: React.FC = () => {
                 case "PLOT_GEOJSON":
                   controller.plotGeoJSON(operation.payload);
                   break;
+                case "MARKETING_POST_GENERATED": {
+                  // Add single marketing post and open studio view
+                  const postPayload = operation.payload;
+                  addPostFromResponse({
+                    platform: postPayload.platform,
+                    headline: postPayload.headline,
+                    caption: postPayload.caption,
+                    hashtags: postPayload.hashtags,
+                    imageUrl: postPayload.imageUrl,
+                    segmentName: postPayload.segmentName,
+                  });
+                  // Switch to studio tab to show the generated post
+                  setActiveCanvasTab("studio");
+                  break;
+                }
+                case "MARKETING_GENERATION_STARTED": {
+                  // Generation started - open Studio tab immediately with skeleton loaders
+                  const startPayload = operation.payload;
+                  const loadingPosts = startPayload.posts.map((p) => ({
+                    id: p.id || `post-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    platform: p.platform,
+                    headline: p.headline,
+                    caption: p.caption,
+                    hashtags: p.hashtags,
+                    imageUrl: undefined, // No image yet
+                    businessName: p.businessName || startPayload.businessName,
+                    segmentName: p.segmentName,
+                    createdAt: new Date(),
+                    isLoading: true, // Show skeleton loader
+                  }));
+                  startGeneration(loadingPosts, startPayload.businessName, startPayload.businessType);
+                  // Switch to studio tab immediately
+                  setActiveCanvasTab("studio");
+                  break;
+                }
+                case "MARKETING_POSTS_GENERATED": {
+                  // Images are ready - update posts with final images
+                  const postsPayload = operation.payload;
+                  if (postsPayload.businessName) {
+                    setBusinessInfo(postsPayload.businessName, postsPayload.businessType);
+                  }
+                  const marketingPosts = postsPayload.posts.map((p) => ({
+                    id: p.id || `post-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    platform: p.platform,
+                    headline: p.headline,
+                    caption: p.caption,
+                    hashtags: p.hashtags,
+                    imageUrl: p.imageUrl,
+                    businessName: p.businessName || postsPayload.businessName,
+                    segmentName: p.segmentName,
+                    createdAt: new Date(),
+                    isLoading: false,
+                  }));
+                  completeGeneration(marketingPosts);
+                  // Ensure studio tab is active (in case it wasn't already)
+                  setActiveCanvasTab("studio");
+                  break;
+                }
+                case "OPEN_STUDIO_VIEW":
+                  // Switch to the studio tab
+                  setActiveCanvasTab("studio");
+                  break;
+                case "LIFESTYLE_REPORT_GENERATED": {
+                  // Add lifestyle report to store
+                  const reportPayload = operation.payload;
+                  setLifestyleReport(reportPayload);
+                  // Switch to split view if not already
+                  if (viewModeContext?.setViewMode) {
+                    viewModeContext.setViewMode("split");
+                  }
+                  // Open Tools panel and switch to Analyze tab to show the report
+                  openAnalysisView();
+                  break;
+                }
                 default:
                   console.warn("Invalid operation type: ", operation.type);
                   break;

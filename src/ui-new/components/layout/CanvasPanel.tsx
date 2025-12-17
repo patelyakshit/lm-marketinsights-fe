@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import MapViewComponent from "../../../pages/MapView";
 import { ArtifactRoot } from "../../../artifacts/ArtifactRoot";
 import { useArtifactStore } from "../../../store/useArtifactStore";
+import { useToolsPanelStore } from "../../../store/useToolsPanelStore";
 import ToolsInsightsPanel from "./ToolsInsightsPanel";
 import { IconAccordionCollapse, IconAccordionExpand } from "../../assets/icons";
 
@@ -12,7 +13,8 @@ interface CanvasPanelProps {
 const CanvasPanel: React.FC<CanvasPanelProps> = ({ className = "" }) => {
   const { activeArtifact } = useArtifactStore();
   const isArtifactActive = !!activeArtifact;
-  const [isToolsCollapsed, setIsToolsCollapsed] = useState(true);
+  const { isCollapsed: isToolsCollapsed, setIsCollapsed: setIsToolsCollapsed } = useToolsPanelStore();
+
   const [isMapCollapsed, setIsMapCollapsed] = useState(false);
 
   const handleMapToggle = () => {
@@ -45,10 +47,15 @@ const CanvasPanel: React.FC<CanvasPanelProps> = ({ className = "" }) => {
       >
         {/* Map Header */}
         <div
-          className="shrink-0 flex items-center justify-between px-1 py-1 accordion-header cursor-pointer"
-          onClick={handleMapToggle}
+          className="shrink-0 flex items-center justify-between px-3 py-2"
+          style={{ borderBottom: "1px solid #eceae9" }}
         >
-          <div className="flex items-center gap-2.5 px-2.5 py-1.5">
+          <div className="flex items-center gap-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1d1916" strokeWidth="2">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+              <line x1="8" y1="2" x2="8" y2="18" />
+              <line x1="16" y1="6" x2="16" y2="22" />
+            </svg>
             <span
               className="text-sm font-normal"
               style={{
@@ -60,30 +67,24 @@ const CanvasPanel: React.FC<CanvasPanelProps> = ({ className = "" }) => {
               Map View
             </span>
           </div>
-          <div className="flex items-center gap-0.5">
+
+          {/* Collapse/Expand Button */}
+          <button
+            onClick={handleMapToggle}
+            className="p-1.5 rounded hover:bg-[#f3f2f2] transition-colors"
+          >
             {isMapCollapsed ? (
-              <div className="accordion-icon-wrapper">
-                <IconAccordionExpand
-                  size={16}
-                  color="var(--neutral-800, #1d1916)"
-                />
-              </div>
+              <IconAccordionExpand size={16} color="#1d1916" />
             ) : (
-              <div className="accordion-icon-wrapper">
-                <IconAccordionCollapse
-                  size={16}
-                  color="var(--neutral-800, #1d1916)"
-                />
-              </div>
+              <IconAccordionCollapse size={16} color="#1d1916" />
             )}
-          </div>
+          </button>
         </div>
 
-        {/* Map Content */}
+        {/* Map Content Area */}
         {!isMapCollapsed && (
           <div className="flex-1 min-h-0 overflow-hidden relative">
             <MapViewComponent />
-
             {/* Artifact Overlay */}
             {isArtifactActive && activeArtifact && (
               <div className="absolute inset-0 w-full h-full z-20 bg-white">
@@ -130,10 +131,7 @@ const CanvasPanel: React.FC<CanvasPanelProps> = ({ className = "" }) => {
             </div>
             <div className="flex items-center gap-0.5">
               <div className="accordion-icon-wrapper">
-                <IconAccordionExpand
-                  size={16}
-                  color="var(--neutral-800, #1d1916)"
-                />
+                <IconAccordionExpand size={16} color="#1d1916" />
               </div>
             </div>
           </div>

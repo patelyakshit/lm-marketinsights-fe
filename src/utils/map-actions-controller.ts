@@ -2,6 +2,7 @@ import Graphic from "@arcgis/core/Graphic";
 import { Extent, Point } from "@arcgis/core/geometry";
 import FeatureLayer from "@arcgis/core/layers/FeatureLayer";
 import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
+import GroupLayer from "@arcgis/core/layers/GroupLayer";
 import MapImageLayer from "@arcgis/core/layers/MapImageLayer";
 import MapView from "@arcgis/core/views/MapView";
 import * as webMercatorUtils from "@arcgis/core/geometry/support/webMercatorUtils";
@@ -331,22 +332,86 @@ export class MapActionsController {
     whereClause: string,
     spatialLock: boolean = false,
   ) {
+    console.log(`[applyFilter] Called with layerId: ${layerId}, whereClause: ${whereClause}, spatialLock: ${spatialLock}`);
+
     const { layers } = useMapStore.getState();
-    const targetLayer = this.findLayerById(layerId);
+    let targetLayer = this.findLayerById(layerId);
+    let parentLayerId = layerId;
+    let sublayerNumericId: number | null = null;
+
+    // If layer not found directly, try to parse as sublayer ID (format: parentId_sublayerId)
+    if (!targetLayer && layerId.includes("_")) {
+      const parts = layerId.split("_");
+      const possibleSublayerId = parts.pop();
+      parentLayerId = parts.join("_");
+
+      console.log(`[applyFilter] Layer not found directly, trying parent: ${parentLayerId}, sublayer: ${possibleSublayerId}`);
+
+      targetLayer = this.findLayerById(parentLayerId);
+      if (targetLayer && possibleSublayerId) {
+        sublayerNumericId = parseInt(possibleSublayerId, 10);
+      }
+    }
+
+    // Also try to find by layer title/name in the store
+    if (!targetLayer) {
+      console.log(`[applyFilter] Searching store layers for match...`);
+      const storeLayer = layers.find(l =>
+        l.id === layerId ||
+        l.title?.toLowerCase().includes(layerId.toLowerCase()) ||
+        layerId.toLowerCase().includes(l.title?.toLowerCase() || "")
+      );
+
+      if (storeLayer) {
+        console.log(`[applyFilter] Found store layer: ${storeLayer.id} - ${storeLayer.title}`);
+        targetLayer = this.findLayerById(storeLayer.id);
+        parentLayerId = storeLayer.id;
+
+        // If still not found by ID, search the actual map layers by title
+        if (!targetLayer && storeLayer.title) {
+          console.log(`[applyFilter] Layer not found by ID, searching map by title: ${storeLayer.title}`);
+          const allMapLayers = this.view.map?.allLayers;
+          if (allMapLayers) {
+            targetLayer = allMapLayers.find((l: __esri.Layer) =>
+              l.title?.toLowerCase() === storeLayer.title?.toLowerCase()
+            );
+            if (targetLayer) {
+              console.log(`[applyFilter] Found layer by title in map: ${targetLayer.title} (actual ID: ${targetLayer.id})`);
+            }
+          }
+        }
+
+        // Check if this is a MapImageLayer with sublayers matching the query
+        if (targetLayer instanceof MapImageLayer && storeLayer.layers) {
+          const matchingSublayer = storeLayer.layers.find((sl: any) =>
+            sl.title?.toLowerCase().includes(layerId.toLowerCase()) ||
+            layerId.toLowerCase().includes(sl.title?.toLowerCase() || "")
+          );
+          if (matchingSublayer && matchingSublayer.sublayerId !== undefined) {
+            sublayerNumericId = matchingSublayer.sublayerId;
+            console.log(`[applyFilter] Found matching sublayer: ${matchingSublayer.title} (${sublayerNumericId})`);
+          }
+        }
+      }
+    }
 
     if (!targetLayer) {
-      console.warn("Could not find layer with id: ", layerId);
+      console.warn(`[applyFilter] Could not find layer with id: ${layerId}`);
+      console.log(`[applyFilter] Available layers:`, layers.map(l => ({ id: l.id, title: l.title })));
       return;
     }
 
+    console.log(`[applyFilter] Found target layer: ${targetLayer.title || targetLayer.id} (type: ${targetLayer.type})`);
+
     // Handle FeatureLayer
     if (targetLayer instanceof FeatureLayer) {
+      console.log(`[applyFilter] Applying filter to FeatureLayer: ${whereClause}`);
       targetLayer.definitionExpression = whereClause;
 
       // Update store with filter conditions
       useMapStore.getState().setLayers(
         layers.map((l) =>
-          l.id === layerId
+          l.id === parentLayerId
             ? {
                 ...l,
                 filterConditions: [
@@ -377,61 +442,145 @@ export class MapActionsController {
             this.view.goTo(results.features);
           } else {
             console.warn(
-              `No features found for layer ${layerId} with filter: ${whereClause}`,
+              `[applyFilter] No features found for layer ${layerId} with filter: ${whereClause}`,
             );
           }
         } catch (error) {
-          console.error("Error querying features for layer: ", layerId, error);
+          console.error("[applyFilter] Error querying features for layer: ", layerId, error);
         }
       }
+
+      console.log(`[applyFilter] Successfully applied filter to FeatureLayer`);
     }
     // Handle MapImageLayer (sublayers)
     else if (targetLayer instanceof MapImageLayer) {
-      const sublayerId = layerId.split("_").pop();
-      const sublayer = targetLayer.findSublayerById(
-        parseInt(sublayerId || "0"),
-      );
+      console.log(`[applyFilter] Target is MapImageLayer, looking for sublayer...`);
+
+      // If we already have the sublayer ID, use it
+      // Otherwise, try to find the sublayer by matching title
+      let sublayer: __esri.Sublayer | undefined;
+
+      if (sublayerNumericId !== null) {
+        sublayer = targetLayer.findSublayerById(sublayerNumericId) ?? undefined;
+        console.log(`[applyFilter] Found sublayer by ID ${sublayerNumericId}: ${sublayer?.title}`);
+      }
+
+      // If not found by ID, try to find by title match
+      if (!sublayer && targetLayer.sublayers) {
+        const searchTerm = layerId.toLowerCase();
+        sublayer = targetLayer.sublayers.find((sl: __esri.Sublayer) =>
+          sl.title?.toLowerCase().includes(searchTerm) ||
+          searchTerm.includes(sl.title?.toLowerCase() || "")
+        );
+        if (sublayer) {
+          sublayerNumericId = sublayer.id;
+          console.log(`[applyFilter] Found sublayer by title match: ${sublayer.title} (${sublayerNumericId})`);
+        }
+      }
 
       if (sublayer) {
+        console.log(`[applyFilter] Applying filter to sublayer ${sublayer.title}: ${whereClause}`);
         sublayer.definitionExpression = whereClause;
 
         // Update store with filter conditions for sublayer
-        useMapStore.getState().setLayers(
-          layers.map((l) =>
-            l.id === layerId
-              ? {
-                  ...l,
-                  layers: l.layers?.map((sl: any) =>
-                    sl.id === sublayerId
-                      ? {
-                          ...sl,
-                          filterConditions: [
-                            ...(sl.filterConditions || []),
-                            {
-                              id: `filter-${Date.now()}`,
-                              field: "",
-                              operator: "where",
-                              value: whereClause,
-                              isActive: true,
-                            },
-                          ],
-                        }
-                      : sl,
-                  ),
-                }
-              : l,
-          ),
-        );
+        const storeLayer = layers.find(l => l.id === parentLayerId);
+        if (storeLayer) {
+          useMapStore.getState().setLayers(
+            layers.map((l) =>
+              l.id === parentLayerId
+                ? {
+                    ...l,
+                    layers: l.layers?.map((sl: any) =>
+                      sl.sublayerId === sublayerNumericId
+                        ? {
+                            ...sl,
+                            filterConditions: [
+                              ...(sl.filterConditions || []),
+                              {
+                                id: `filter-${Date.now()}`,
+                                field: "",
+                                operator: "where",
+                                value: whereClause,
+                                isActive: true,
+                              },
+                            ],
+                          }
+                        : sl,
+                    ),
+                  }
+                : l,
+            ),
+          );
+        }
+
+        console.log(`[applyFilter] Successfully applied filter to sublayer`);
       } else {
         console.warn(
-          `Sublayer with id ${sublayerId} not found in MapImageLayer ${layerId}`,
+          `[applyFilter] Sublayer not found in MapImageLayer ${parentLayerId}`,
         );
+        console.log(`[applyFilter] Available sublayers:`, targetLayer.sublayers?.map((sl: __esri.Sublayer) => ({ id: sl.id, title: sl.title })));
+      }
+    }
+    // Handle GroupLayer (contains multiple FeatureLayers)
+    else if (targetLayer instanceof GroupLayer) {
+      console.log(`[applyFilter] Target is GroupLayer, looking for FeatureLayer sublayers...`);
+      console.log(`[applyFilter] GroupLayer has ${targetLayer.layers?.length || 0} sublayers`);
+
+      // Find FeatureLayer(s) within the GroupLayer to apply the filter
+      let filterApplied = false;
+
+      if (targetLayer.layers) {
+        for (const sublayer of targetLayer.layers.toArray()) {
+          console.log(`[applyFilter] Checking sublayer: ${sublayer.title} (type: ${sublayer.type})`);
+
+          if (sublayer instanceof FeatureLayer) {
+            console.log(`[applyFilter] Applying filter to FeatureLayer sublayer: ${sublayer.title}`);
+            sublayer.definitionExpression = whereClause;
+            filterApplied = true;
+
+            // Update store
+            useMapStore.getState().setLayers(
+              layers.map((l) =>
+                l.id === parentLayerId
+                  ? {
+                      ...l,
+                      layers: l.layers?.map((sl: any) =>
+                        sl.title?.toLowerCase() === sublayer.title?.toLowerCase()
+                          ? {
+                              ...sl,
+                              filterConditions: [
+                                ...(sl.filterConditions || []),
+                                {
+                                  id: `filter-${Date.now()}`,
+                                  field: "",
+                                  operator: "where",
+                                  value: whereClause,
+                                  isActive: true,
+                                },
+                              ],
+                            }
+                          : sl,
+                      ),
+                    }
+                  : l,
+              ),
+            );
+          }
+        }
+      }
+
+      if (filterApplied) {
+        console.log(`[applyFilter] Successfully applied filter to GroupLayer sublayers`);
+      } else {
+        console.warn(`[applyFilter] No FeatureLayer sublayers found in GroupLayer`);
       }
     } else {
       console.warn(
-        `Layer with id ${layerId} is not a FeatureLayer or MapImageLayer. Type: ${targetLayer.type}`,
+        `[applyFilter] Layer with id ${layerId} is not a FeatureLayer, MapImageLayer, or GroupLayer. Type: ${targetLayer.type}`,
       );
     }
+
+    useMapStore.getState().setMapView(this.view);
   }
 
   // Legacy filter method for backward compatibility

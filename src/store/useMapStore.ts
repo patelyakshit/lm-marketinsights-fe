@@ -267,12 +267,13 @@ export const useMapStore = create<MapStore>((set, get) => ({
 
     console.log(`[getCurrentMapState] Fast path: ${basicLayers.length} layers`);
 
-    // Performance optimization: Add 500ms timeout to prevent blocking (increased from 200ms)
+    // Performance optimization: Add 2000ms timeout to prevent blocking
+    // Increased from 500ms to allow for larger layers with feature queries
     const timeoutPromise = new Promise<null[]>((resolve) =>
       setTimeout(() => {
         console.warn("[getCurrentMapState] Timeout hit, using basic layers");
         resolve([]);
-      }, 500)
+      }, 2000)
     );
 
     const layerPromise = Promise.all(

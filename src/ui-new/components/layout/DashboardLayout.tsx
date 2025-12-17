@@ -2,6 +2,9 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { colors } from "../../design-system";
 import { Sidebar, ViewMode } from "./Sidebar";
+import { useCanvasStore } from "../../../store/useCanvasStore";
+import { useMarketingStore } from "../../../store/useMarketingStore";
+import StudioContent from "./StudioContent";
 
 interface DashboardLayoutProps {
   mapComponent: React.ReactNode;
@@ -30,6 +33,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const [chatWidth, setChatWidth] = useState(400);
   const [isResizing, setIsResizing] = useState(false);
+
+  // Canvas tabs state
+  const { activeCanvasTab, setActiveCanvasTab } = useCanvasStore();
+  const { posts } = useMarketingStore();
+  const hasStudioContent = posts.length > 0;
 
   const handleToggleCollapse = useCallback(() => {
     setIsCollapsed((prev) => !prev);
@@ -238,7 +246,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* Main Content Area */}
       <main className="flex-1 min-w-0 h-full overflow-hidden relative">
         <div
-          className="absolute inset-0 w-full h-full transition-opacity duration-300"
+          className="absolute inset-0 w-full h-full transition-opacity duration-300 flex flex-col"
           style={{
             zIndex: isArtifactActive ? 0 : 1,
             opacity: isArtifactActive || viewMode === "chat" ? 0 : 1,
@@ -246,16 +254,73 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               isArtifactActive || viewMode === "chat" ? "none" : "auto",
           }}
         >
-          <div
-            className="w-full h-full m-3 rounded-xl border overflow-hidden"
-            style={{
-              borderColor: colors.neutral[200],
-              backgroundColor: colors.static.white,
-              width: "calc(100% - 24px)",
-              height: "calc(100% - 24px)",
-            }}
-          >
-            {mapComponent}
+          {/* Top-level Tabs - Map View | Studio View */}
+          <div className="shrink-0 flex items-center gap-2 px-3 pt-3 pb-2">
+            <button
+              onClick={() => setActiveCanvasTab("map")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeCanvasTab === "map"
+                  ? "bg-white text-[#1d1916] shadow-sm border border-[#e5e5e5]"
+                  : "text-[#545251] hover:bg-white/50"
+              }`}
+              style={{ fontFamily: "Switzer, sans-serif" }}
+            >
+              Map View
+            </button>
+            {hasStudioContent && (
+              <button
+                onClick={() => setActiveCanvasTab("studio")}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                  activeCanvasTab === "studio"
+                    ? "bg-white text-[#1d1916] shadow-sm border border-[#e5e5e5]"
+                    : "text-[#545251] hover:bg-white/50"
+                }`}
+                style={{ fontFamily: "Switzer, sans-serif" }}
+              >
+                Studio View
+                {posts.length > 0 && (
+                  <span
+                    className="px-1.5 py-0.5 text-xs rounded-full"
+                    style={{
+                      backgroundColor: "#ff7700",
+                      color: "#ffffff",
+                      fontSize: "10px",
+                    }}
+                  >
+                    {posts.length}
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Content Area */}
+          <div className="flex-1 min-h-0 px-3 pb-3">
+            {/* Map View Content */}
+            {activeCanvasTab === "map" && (
+              <div
+                className="w-full h-full rounded-xl border overflow-hidden"
+                style={{
+                  borderColor: colors.neutral[200],
+                  backgroundColor: colors.static.white,
+                }}
+              >
+                {mapComponent}
+              </div>
+            )}
+
+            {/* Studio View Content */}
+            {activeCanvasTab === "studio" && (
+              <div
+                className="w-full h-full rounded-xl border overflow-hidden"
+                style={{
+                  borderColor: colors.neutral[200],
+                  backgroundColor: colors.static.white,
+                }}
+              >
+                <StudioContent className="w-full h-full" />
+              </div>
+            )}
           </div>
         </div>
 
